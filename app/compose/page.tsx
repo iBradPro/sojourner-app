@@ -28,6 +28,7 @@ export default async function ComposePage({
       initialTab={tab === 'drafts' ? 'drafts' : 'new'}
       editDraft={editDraft}
       savedBanner={!!saved}
+      isGM={me.scopes.includes('posts:read.all') || me.user.is_sysadmin}
     />
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import ComposeForm from '@/components/ComposeForm';
 import type { MyCharacter, Mission, Post } from '@/lib/api';
 
@@ -11,12 +10,19 @@ interface Props {
   initialTab: 'new' | 'drafts';
   editDraft: Post | null;
   savedBanner: boolean;
+  isGM: boolean;
 }
 
-export default function WriteTabs({ characters, missions, drafts, initialTab, editDraft, savedBanner }: Props) {
-  const router = useRouter();
+export default function WriteTabs({ characters, missions, drafts, initialTab, editDraft, savedBanner, isGM }: Props) {
   const [tab, setTab] = useState<'new' | 'drafts'>(initialTab);
   const [activeDraft, setActiveDraft] = useState<Post | null>(editDraft);
+  const [gmView, setGmView] = useState(false);
+
+  const myCharNames = new Set(characters.map(c => c.name));
+  const myDrafts = drafts.filter(d =>
+    d.authors?.split(',').map(s => s.trim()).some(a => myCharNames.has(a))
+  );
+  const visibleDrafts = isGM && gmView ? drafts : myDrafts;
 
   function openDraft(draft: Post) {
     setActiveDraft(draft);
@@ -51,7 +57,7 @@ export default function WriteTabs({ characters, missions, drafts, initialTab, ed
             tab === 'drafts' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-300'
           }`}
         >
-          Drafts {drafts.length > 0 && <span className="ml-1 text-xs text-slate-400">({drafts.length})</span>}
+          Drafts {myDrafts.length > 0 && <span className="ml-1 text-xs text-slate-400">({myDrafts.length})</span>}
         </button>
       </div>
 
@@ -66,16 +72,31 @@ export default function WriteTabs({ characters, missions, drafts, initialTab, ed
 
       {tab === 'drafts' && (
         <div className="space-y-3">
-          {drafts.length === 0 ? (
+          {isGM && (
+            <div className="flex justify-end mb-1">
+              <button
+                onClick={() => setGmView(v => !v)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  gmView ? 'bg-amber-700 text-amber-100' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                }`}
+              >
+                {gmView ? 'GM View ★' : 'GM View'}
+              </button>
+            </div>
+          )}
+          {visibleDrafts.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-8">No saved drafts.</p>
           ) : (
-            drafts.map(draft => (
+            visibleDrafts.map(draft => (
               <button
                 key={draft.id}
                 onClick={() => openDraft(draft)}
                 className="w-full text-left bg-slate-800 hover:bg-slate-700 rounded-xl px-4 py-4 transition-colors"
               >
                 <p className="text-slate-100 font-medium">{draft.title || 'Untitled'}</p>
+                {gmView && draft.authors && (
+                  <p className="text-slate-500 text-xs mt-0.5">{draft.authors}</p>
+                )}
                 <p className="text-slate-500 text-xs mt-1">{new Date(draft.date).toLocaleDateString()}</p>
               </button>
             ))

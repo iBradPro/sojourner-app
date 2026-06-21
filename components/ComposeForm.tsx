@@ -46,6 +46,10 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
       setError('Title and content are required.');
       return;
     }
+    if (selectedAuthors.length === 0) {
+      setError('At least one character must be selected.');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
