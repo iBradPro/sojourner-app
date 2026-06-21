@@ -57,7 +57,7 @@ export default function WelcomeModal() {
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-2xl bg-slate-900 border-t border-slate-700 rounded-t-2xl px-5 py-6 space-y-5">
         <div>
-          <h2 className="text-xl font-bold text-sky-400">Welcome to Sojourner</h2>
+          <h2 className="text-xl font-bold text-sky-400">Welcome to the USS Sojourner app!</h2>
           <p className="text-slate-400 text-sm mt-1">
             To read posts, missions, and explore the ship, no setup is needed.
             To write and edit posts, you'll need a personal API token.
