@@ -4,12 +4,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default async function Home() {
-  const [recentPosts, missions] = await Promise.all([
+  const [recentPosts, currentMissions, allMissions, samplePosts] = await Promise.all([
     api.posts({ per_page: 5 }),
     api.missions({ status: 'current' }),
+    api.missions({ per_page: 1 }),
+    api.posts({ per_page: 50, page: 1 }),
   ]);
 
-  const currentMission = missions.data[0] ?? null;
+  const currentMission = currentMissions.data[0] ?? null;
+
+  const avgWords = samplePosts.data.reduce((sum, p) => {
+    const text = stripHtml(p.content).trim();
+    return sum + (text ? text.split(/\s+/).length : 0);
+  }, 0) / (samplePosts.data.length || 1);
+  const booksWritten = Math.floor((avgWords * recentPosts.total) / 50000);
 
   return (
     <div className="space-y-8 pb-6">
@@ -71,8 +79,12 @@ export default async function Home() {
               <p className="text-xs text-slate-500 mt-1">Total Posts</p>
             </div>
             <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
-              <p className="text-3xl font-bold text-sky-400">{missions.total}</p>
+              <p className="text-3xl font-bold text-sky-400">{allMissions.total}</p>
               <p className="text-xs text-slate-500 mt-1">Missions</p>
+            </div>
+            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center col-span-2">
+              <p className="text-3xl font-bold text-sky-400">{booksWritten}</p>
+              <p className="text-xs text-slate-500 mt-1">Books Written Together</p>
             </div>
           </div>
         </section>
