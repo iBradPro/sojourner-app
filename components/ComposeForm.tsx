@@ -29,11 +29,11 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
       ? String(draft.mission_id)
       : String(missions.find(m => m.status === 'current')?.id ?? '')
   );
-  const [selectedAuthors, setSelectedAuthors] = useState<number[]>(
-    draft
-      ? characters.filter(c => draft.authors?.split(',').map(s => s.trim()).includes(c.name)).map(c => c.id)
-      : characters.filter(c => c.is_main).map(c => c.id)
-  );
+  const [selectedAuthors, setSelectedAuthors] = useState<number[]>(() => {
+    if (!draft) return characters.filter(c => c.is_main).map(c => c.id);
+    const parts = draft.authors?.split(',').map(s => s.trim()) ?? [];
+    return characters.filter(c => parts.includes(String(c.id)) || parts.includes(c.name)).map(c => c.id);
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
