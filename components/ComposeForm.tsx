@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MyCharacter, Mission, Post } from '@/lib/api';
 
@@ -36,6 +36,11 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [error]);
 
   function toggleAuthor(id: number) {
     setSelectedAuthors(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -78,7 +83,7 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
   return (
     <div className="space-y-5">
       {error && (
-        <div className="bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">{error}</div>
+        <div ref={errorRef} className="bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">{error}</div>
       )}
 
       <div>
