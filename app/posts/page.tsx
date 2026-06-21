@@ -1,8 +1,8 @@
 import { api } from '@/lib/api';
 import Link from 'next/link';
 
-export default async function PostsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-  const { page: pageParam } = await searchParams;
+export default async function PostsPage({ searchParams }: { searchParams: Promise<{ page?: string; saved?: string }> }) {
+  const { page: pageParam, saved } = await searchParams;
   const page = Number(pageParam ?? 1);
   const posts = await api.posts({ per_page: 25, page });
 
@@ -10,6 +10,11 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="px-4 py-6 space-y-4">
+      {saved && (
+        <div className="bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded-xl px-4 py-3 text-sm">
+          Draft saved to the sim.
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-sky-400">Posts</h1>
         <span className="text-xs text-slate-500">{posts.total} total</span>

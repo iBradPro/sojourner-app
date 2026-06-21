@@ -44,7 +44,12 @@ export default function ComposeForm({ characters, missions }: { characters: MyCh
         mission_id: missionId ? Number(missionId) : undefined,
         authors: selectedAuthors.join(','),
       });
-      router.push(`/posts/${post.id}`);
+      // Draft posts return 404 when read back, so only go to the post detail if published
+      if (status === 'activated') {
+        router.push(`/posts/${post.id}`);
+      } else {
+        router.push('/posts?saved=1');
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
       setSaving(false);
