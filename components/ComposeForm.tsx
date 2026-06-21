@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { MyCharacter, Mission } from '@/lib/api';
+import type { MyCharacter, Mission, Post } from '@/lib/api';
 
 async function proxyRequest(path: string, method: string, body?: Record<string, unknown>) {
   const res = await fetch('/api/proxy', {
@@ -14,13 +14,25 @@ async function proxyRequest(path: string, method: string, body?: Record<string, 
   return data;
 }
 
-export default function ComposeForm({ characters, missions }: { characters: MyCharacter[]; missions: Mission[] }) {
+interface Props {
+  characters: MyCharacter[];
+  missions: Mission[];
+  draft?: Post;
+}
+
+export default function ComposeForm({ characters, missions, draft }: Props) {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [missionId, setMissionId] = useState<string>(String(missions.find(m => m.status === 'current')?.id ?? ''));
+  const [title, setTitle] = useState(draft?.title ?? '');
+  const [body, setBody] = useState(draft?.content ?? '');
+  const [missionId, setMissionId] = useState<string>(
+    draft?.mission_id != null
+      ? String(draft.mission_id)
+      : String(missions.find(m => m.status === 'current')?.id ?? '')
+  );
   const [selectedAuthors, setSelectedAuthors] = useState<number[]>(
-    characters.filter(c => c.is_main).map(c => c.id)
+    draft
+      ? characters.filter(c => draft.authors?.split(',').map(s => s.trim()).includes(c.name)).map(c => c.id)
+      : characters.filter(c => c.is_main).map(c => c.id)
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -37,18 +49,21 @@ export default function ComposeForm({ characters, missions }: { characters: MyCh
     setSaving(true);
     setError('');
     try {
-      const post = await proxyRequest('/posts', 'POST', {
+      const payload = {
         title: title.trim(),
         body: body.trim(),
         status,
         mission_id: missionId ? Number(missionId) : undefined,
         authors: selectedAuthors.join(','),
-      });
-      // Draft posts return 404 when read back, so only go to the post detail if published
+      };
+      const post = draft
+        ? await proxyRequest(`/posts/${draft.id}`, 'PATCH', payload)
+        : await proxyRequest('/posts', 'POST', payload);
+
       if (status === 'activated') {
         router.push(`/posts/${post.id}`);
       } else {
-        router.push('/posts?saved=1');
+        router.push('/compose?saved=1');
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');

@@ -4,9 +4,9 @@ import { usePathname } from 'next/navigation';
 
 const links = [
   { href: '/', label: 'Home', icon: '🏠' },
-  { href: '/missions', label: 'Missions', icon: '🚀' },
   { href: '/posts', label: 'Posts', icon: '📝' },
   { href: '/compose', label: 'Write', icon: '✏️' },
+  { href: '/missions', label: 'Missions', icon: '🚀' },
   { href: '/crew', label: 'Crew', icon: '👥' },
 ];
 
