@@ -55,7 +55,7 @@ export default function WelcomeModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-slate-900 border-t border-slate-700 rounded-t-2xl px-5 py-6 space-y-5">
+      <div className="w-full max-w-2xl bg-slate-900 border-t border-slate-700 rounded-t-2xl px-5 pt-4 pb-24 space-y-3">
         <div>
           <h2 className="text-xl font-bold text-sky-400">Welcome to the USS Sojourner app!</h2>
           <p className="text-slate-400 text-sm mt-1">
@@ -83,24 +83,23 @@ export default function WelcomeModal() {
             value={token}
             onChange={e => setToken(e.target.value)}
             placeholder="Paste your API token (scapi_...)"
-            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-sky-600 font-mono text-sm"
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-sky-600 font-mono text-sm"
           />
-          <button
-            onClick={handleSave}
-            disabled={saving || !token.trim()}
-            className="w-full py-3 rounded-xl bg-sky-700 text-white font-medium hover:bg-sky-600 transition-colors disabled:opacity-50"
-          >
-            {saving ? 'Verifying…' : 'Set Up Write Access'}
-          </button>
-        </div>
-
-        <div className="text-center">
-          <button
-            onClick={dismiss}
-            className="text-slate-500 hover:text-slate-300 text-sm transition-colors"
-          >
-            Just browsing for now →
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={dismiss}
+              className="flex-1 py-2.5 rounded-xl bg-slate-700 text-slate-300 text-sm font-medium hover:bg-slate-600 transition-colors"
+            >
+              Just browsing
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || !token.trim()}
+              className="flex-1 py-2.5 rounded-xl bg-sky-700 text-white text-sm font-medium hover:bg-sky-600 transition-colors disabled:opacity-50"
+            >
+              {saving ? 'Verifying…' : 'Set Up Access'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
