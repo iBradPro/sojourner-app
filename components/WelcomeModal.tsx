@@ -60,7 +60,16 @@ export default function WelcomeModal() {
           <h2 className="text-xl font-bold text-sky-400">Welcome to the USS Sojourner app!</h2>
           <p className="text-slate-400 text-sm mt-1">
             To read posts, missions, and explore the ship, no setup is needed.
-            To write and edit posts, you'll need a personal API token.
+            To write and edit posts, you'll need a personal API token.{' '}
+            <a
+              href="https://discord.com/users/301501040879075328"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400 underline"
+            >
+              Contact your GM
+            </a>{' '}
+            for a setup link.
           </p>
         </div>
 
@@ -85,10 +94,7 @@ export default function WelcomeModal() {
           </button>
         </div>
 
-        <div className="text-center space-y-1">
-          <p className="text-slate-500 text-xs">
-            Don't have a token? Ask your GM for a setup link.
-          </p>
+        <div className="text-center">
           <button
             onClick={dismiss}
             className="text-slate-500 hover:text-slate-300 text-sm transition-colors"

@@ -9,6 +9,7 @@ const links = [
   { href: '/tour', label: 'Tour', icon: '🚢' },
   { href: '/missions', label: 'Missions', icon: '🚀' },
   { href: '/crew', label: 'Crew', icon: '👥' },
+  { href: '/settings', label: 'Settings', icon: '⚙️' },
 ];
 
 export default function Nav() {
