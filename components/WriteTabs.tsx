@@ -19,9 +19,11 @@ export default function WriteTabs({ characters, missions, drafts, initialTab, ed
   const [gmView, setGmView] = useState(false);
 
   const myCharNames = new Set(characters.map(c => c.name));
-  const myDrafts = drafts.filter(d =>
-    d.authors?.split(',').map(s => s.trim()).some(a => myCharNames.has(a))
-  );
+  const myCharIds = new Set(characters.map(c => String(c.id)));
+  const myDrafts = drafts.filter(d => {
+    const parts = d.authors?.split(',').map(s => s.trim()) ?? [];
+    return parts.some(a => myCharNames.has(a) || myCharIds.has(a));
+  });
   const visibleDrafts = isGM && gmView ? drafts : myDrafts;
 
   function openDraft(draft: Post) {
