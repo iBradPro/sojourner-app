@@ -6,6 +6,7 @@ const links = [
   { href: '/', label: 'Home', icon: '🏠' },
   { href: '/missions', label: 'Missions', icon: '🚀' },
   { href: '/posts', label: 'Posts', icon: '📝' },
+  { href: '/compose', label: 'Write', icon: '✏️' },
   { href: '/crew', label: 'Crew', icon: '👥' },
 ];
 

@@ -1,5 +1,6 @@
 const BASE = 'https://sojourner.simcentral.org/extensions/nova_ext_sim_central/Api';
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? '';
+const WRITE_KEY = process.env.NEXT_PUBLIC_WRITE_API_KEY ?? '';
 
 async function apiFetch<T>(path: string, params?: Record<string, string | number>): Promise<T> {
   const url = new URL(`${BASE}${path}`);
@@ -12,6 +13,33 @@ async function apiFetch<T>(path: string, params?: Record<string, string | number
   });
   if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
   return res.json();
+}
+
+async function apiWrite<T>(method: string, path: string, body?: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method,
+    headers: { 'X-API-Key': WRITE_KEY, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { error?: string }).error ?? `API ${res.status}`);
+  }
+  return res.json();
+}
+
+export interface MyCharacter {
+  id: number;
+  name: string;
+  rank: string | null;
+  crew_type: string;
+  is_main: boolean;
+}
+
+export interface Me {
+  user: { id: number; name: string; is_sysadmin: boolean };
+  characters: { pc: MyCharacter[]; npc: MyCharacter[] };
+  scopes: string[];
 }
 
 export interface Post {
@@ -73,4 +101,16 @@ export const api = {
 
   character: (id: number) =>
     apiFetch<Character>(`/characters/${id}`),
+
+  me: () =>
+    apiWrite<Me>('GET', '/me'),
+
+  createPost: (data: { title: string; body: string; mission_id?: number; authors?: string; status: 'saved' | 'activated' }) =>
+    apiWrite<Post>('POST', '/posts', data as Record<string, unknown>),
+
+  updatePost: (id: number, data: { title?: string; body?: string; authors?: string; mission_id?: number; status?: string }) =>
+    apiWrite<Post>('PATCH', `/posts/${id}`, data as Record<string, unknown>),
+
+  deletePost: (id: number) =>
+    apiWrite<{ deleted: boolean }>('DELETE', `/posts/${id}`),
 };
