@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import WelcomeModal from "@/components/WelcomeModal";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="h-full bg-slate-950 text-slate-100 font-sans">
         <div className="flex flex-col min-h-full max-w-2xl mx-auto">
+          <WelcomeModal />
           <main className="flex-1 pb-20">{children}</main>
           <Nav />
         </div>
