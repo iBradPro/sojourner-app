@@ -2,12 +2,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MyCharacter, Mission, Post } from '@/lib/api';
+import { getWriteToken } from '@/lib/token';
 
 async function proxyRequest(path: string, method: string, body?: Record<string, unknown>) {
+  const token = getWriteToken();
   const res = await fetch('/api/proxy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, method, body }),
+    body: JSON.stringify({ path, method, body, ...(token ? { token } : {}) }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? `Error ${res.status}`);

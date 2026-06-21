@@ -1,22 +1,79 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ComposeForm from '@/components/ComposeForm';
+import WriteSetup from '@/components/WriteSetup';
+import { getWriteToken, clearWriteToken, setWriteToken } from '@/lib/token';
 import type { MyCharacter, Mission, Post } from '@/lib/api';
 
 interface Props {
-  characters: MyCharacter[];
-  missions: Mission[];
-  drafts: Post[];
   initialTab: 'new' | 'drafts';
-  editDraft: Post | null;
   savedBanner: boolean;
-  isGM: boolean;
+  magicToken: string | null;
 }
 
-export default function WriteTabs({ characters, missions, drafts, initialTab, editDraft, savedBanner, isGM }: Props) {
+async function proxyFetch<T>(path: string, token: string, params?: Record<string, string>): Promise<T> {
+  const url = params
+    ? `${path}?${new URLSearchParams(params)}`
+    : path;
+  const res = await fetch('/api/proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: url, method: 'GET', token }),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props) {
   const [tab, setTab] = useState<'new' | 'drafts'>(initialTab);
-  const [activeDraft, setActiveDraft] = useState<Post | null>(editDraft);
+  const [activeDraft, setActiveDraft] = useState<Post | null>(null);
   const [gmView, setGmView] = useState(false);
+  const [showTokenPanel, setShowTokenPanel] = useState(false);
+
+  const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [characters, setCharacters] = useState<MyCharacter[]>([]);
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [drafts, setDrafts] = useState<Post[]>([]);
+  const [isGM, setIsGM] = useState(false);
+
+  useEffect(() => {
+    if (magicToken) {
+      setWriteToken(magicToken);
+      window.location.replace('/compose');
+      return;
+    }
+
+    const token = getWriteToken();
+    if (!token) {
+      setHasToken(false);
+      setLoading(false);
+      return;
+    }
+    setHasToken(true);
+
+    async function fetchData() {
+      try {
+        const [me, missionsRes, draftsRes] = await Promise.all([
+          proxyFetch<{ user: { is_sysadmin: boolean }; characters: { pc: MyCharacter[]; npc: MyCharacter[] }; scopes: string[] }>('/me', token!),
+          proxyFetch<{ data: Mission[] }>('/missions', token!, { per_page: '100' }),
+          proxyFetch<{ data: Post[] }>('/posts', token!, { status: 'saved', per_page: '50' }),
+        ]);
+        setCharacters([...me.characters.pc, ...me.characters.npc]);
+        setMissions(missionsRes.data);
+        setDrafts(draftsRes.data);
+        setIsGM(me.scopes.includes('posts:read.all') || me.user.is_sysadmin);
+      } catch {
+        // token may be invalid — clear it and show setup
+        clearWriteToken();
+        setHasToken(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [magicToken]);
 
   const myCharNames = new Set(characters.map(c => c.name));
   const myCharIds = new Set(characters.map(c => String(c.id)));
@@ -36,6 +93,19 @@ export default function WriteTabs({ characters, missions, drafts, initialTab, ed
     setTab('new');
   }
 
+  function handleClearToken() {
+    clearWriteToken();
+    window.location.reload();
+  }
+
+  if (hasToken === null || loading) {
+    return (
+      <div className="px-4 py-12 text-center text-slate-500 text-sm">Loading…</div>
+    );
+  }
+
+  if (!hasToken) return <WriteSetup />;
+
   return (
     <div className="px-4 py-6">
       {savedBanner && (
@@ -44,24 +114,46 @@ export default function WriteTabs({ characters, missions, drafts, initialTab, ed
         </div>
       )}
 
-      <div className="flex rounded-xl bg-slate-800 p-1 mb-6">
+      <div className="flex items-center gap-2 mb-6">
+        <div className="flex flex-1 rounded-xl bg-slate-800 p-1">
+          <button
+            onClick={startNew}
+            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+              tab === 'new' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            {activeDraft ? 'Edit Draft' : 'New Post'}
+          </button>
+          <button
+            onClick={() => setTab('drafts')}
+            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+              tab === 'drafts' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Drafts {myDrafts.length > 0 && <span className="ml-1 text-xs text-slate-400">({myDrafts.length})</span>}
+          </button>
+        </div>
         <button
-          onClick={startNew}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-            tab === 'new' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-300'
-          }`}
+          onClick={() => setShowTokenPanel(v => !v)}
+          className="text-slate-500 hover:text-slate-300 text-lg leading-none px-1"
+          title="Token settings"
         >
-          {activeDraft ? 'Edit Draft' : 'New Post'}
-        </button>
-        <button
-          onClick={() => setTab('drafts')}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-            tab === 'drafts' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-300'
-          }`}
-        >
-          Drafts {myDrafts.length > 0 && <span className="ml-1 text-xs text-slate-400">({myDrafts.length})</span>}
+          ⚙
         </button>
       </div>
+
+      {showTokenPanel && (
+        <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-4 mb-4 space-y-2">
+          <p className="text-slate-300 text-sm font-medium">Write Token</p>
+          <p className="text-slate-500 text-xs">Your API token is saved on this device.</p>
+          <button
+            onClick={handleClearToken}
+            className="text-xs text-red-400 hover:text-red-300 transition-colors"
+          >
+            Remove token (sign out of write access)
+          </button>
+        </div>
+      )}
 
       {tab === 'new' && (
         <ComposeForm
