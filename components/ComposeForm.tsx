@@ -30,7 +30,7 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
       : String(missions.find(m => m.status === 'current')?.id ?? '')
   );
   const [selectedAuthors, setSelectedAuthors] = useState<number[]>(() => {
-    if (!draft) return characters.filter(c => c.is_main).map(c => c.id);
+    if (!draft) return [];
     const parts = draft.authors?.split(',').map(s => s.trim()) ?? [];
     return characters.filter(c => parts.includes(String(c.id)) || parts.includes(c.name)).map(c => c.id);
   });
