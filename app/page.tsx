@@ -4,19 +4,22 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default async function Home() {
-  const [recentPosts, currentMissions, allMissions, samplePosts] = await Promise.all([
-    api.posts({ per_page: 5 }),
+  const [recentPosts, currentMissions, allMissions, activeChars, npcChars] = await Promise.all([
+    api.posts({ per_page: 50 }),
     api.missions({ status: 'current' }),
     api.missions({ per_page: 1 }),
-    api.posts({ per_page: 50, page: 1 }),
+    api.characters({ status: 'active', per_page: 200 }),
+    api.characters({ status: 'npc', per_page: 1 }),
   ]);
 
   const currentMission = currentMissions.data[0] ?? null;
 
-  const avgWords = samplePosts.data.reduce((sum, p) => {
+  const writers = new Set(activeChars.data.map(c => c.user_id).filter(Boolean)).size;
+
+  const avgWords = recentPosts.data.reduce((sum, p) => {
     const text = stripHtml(p.content).trim();
     return sum + (text ? text.split(/\s+/).length : 0);
-  }, 0) / (samplePosts.data.length || 1);
+  }, 0) / (recentPosts.data.length || 1);
   const booksWritten = Math.floor((avgWords * recentPosts.total) / 50000);
 
   return (
@@ -56,33 +59,28 @@ export default async function Home() {
         )}
 
         <section>
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">Recent Posts</h2>
-            <Link href="/posts" className="text-xs text-sky-400 hover:text-sky-300">View all →</Link>
-          </div>
-          <ul className="space-y-2">
-            {recentPosts.data.map((post) => (
-              <li key={post.id}>
-                <Link href={`/posts/${post.id}`} className="block bg-slate-900 rounded-xl p-4 border border-slate-800 hover:border-sky-700 transition-colors">
-                  <p className="font-medium text-slate-100 line-clamp-1">{post.title}</p>
-                  <p className="text-xs text-slate-500 mt-1">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
               <p className="text-3xl font-bold text-sky-400">{recentPosts.total}</p>
-              <p className="text-xs text-slate-500 mt-1">Total Posts</p>
+              <p className="text-xs text-slate-500 mt-1">Posts</p>
             </div>
             <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
               <p className="text-3xl font-bold text-sky-400">{allMissions.total}</p>
               <p className="text-xs text-slate-500 mt-1">Missions</p>
             </div>
-            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center col-span-2">
+            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
+              <p className="text-3xl font-bold text-sky-400">{writers}</p>
+              <p className="text-xs text-slate-500 mt-1">Writers</p>
+            </div>
+            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
+              <p className="text-3xl font-bold text-sky-400">{activeChars.total}</p>
+              <p className="text-xs text-slate-500 mt-1">Main Characters</p>
+            </div>
+            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
+              <p className="text-3xl font-bold text-sky-400">{npcChars.total}</p>
+              <p className="text-xs text-slate-500 mt-1">NPCs</p>
+            </div>
+            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
               <p className="text-3xl font-bold text-sky-400">{booksWritten}</p>
               <p className="text-xs text-slate-500 mt-1">Books Written Together</p>
             </div>
