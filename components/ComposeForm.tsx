@@ -3,20 +3,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MyCharacter, Mission } from '@/lib/api';
 
-const WRITE_KEY = process.env.NEXT_PUBLIC_WRITE_API_KEY ?? '';
-const BASE = 'https://sojourner.simcentral.org/extensions/nova_ext_sim_central/Api';
-
-async function submitPost(data: Record<string, unknown>) {
-  const res = await fetch(`${BASE}/posts`, {
+async function proxyRequest(path: string, method: string, body?: Record<string, unknown>) {
+  const res = await fetch('/api/proxy', {
     method: 'POST',
-    headers: { 'X-API-Key': WRITE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path, method, body }),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error((err as { error?: string }).error ?? `Error ${res.status}`);
-  }
-  return res.json();
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? `Error ${res.status}`);
+  return data;
 }
 
 export default function ComposeForm({ characters, missions }: { characters: MyCharacter[]; missions: Mission[] }) {
@@ -42,7 +37,7 @@ export default function ComposeForm({ characters, missions }: { characters: MyCh
     setSaving(true);
     setError('');
     try {
-      const post = await submitPost({
+      const post = await proxyRequest('/posts', 'POST', {
         title: title.trim(),
         body: body.trim(),
         status,
