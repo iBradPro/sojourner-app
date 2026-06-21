@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ComposeForm from '@/components/ComposeForm';
 import WriteSetup from '@/components/WriteSetup';
 import { getWriteToken, clearWriteToken, setWriteToken } from '@/lib/token';
@@ -29,6 +30,7 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
   const [activeDraft, setActiveDraft] = useState<Post | null>(null);
   const [gmView, setGmView] = useState(false);
   const [showTokenPanel, setShowTokenPanel] = useState(false);
+  const router = useRouter();
 
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -146,6 +148,14 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
         <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-4 mb-4 space-y-2">
           <p className="text-slate-300 text-sm font-medium">Write Token</p>
           <p className="text-slate-500 text-xs">Your API token is saved on this device.</p>
+          {isGM && (
+            <button
+              onClick={() => router.push('/gm')}
+              className="text-xs text-amber-400 hover:text-amber-300 transition-colors block"
+            >
+              GM Tools — generate writer setup links
+            </button>
+          )}
           <button
             onClick={handleClearToken}
             className="text-xs text-red-400 hover:text-red-300 transition-colors"
