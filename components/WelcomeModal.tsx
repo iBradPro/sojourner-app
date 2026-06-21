@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import { getWriteToken, setWriteToken } from '@/lib/token';
 
-const DISMISSED_KEY = 'sojo_welcomed';
-
 export default function WelcomeModal() {
   const [show, setShow] = useState(false);
   const [token, setToken] = useState('');
@@ -11,14 +9,10 @@ export default function WelcomeModal() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Only show if no token and never dismissed
-    if (!getWriteToken() && !localStorage.getItem(DISMISSED_KEY)) {
-      setShow(true);
-    }
+    if (!getWriteToken()) setShow(true);
   }, []);
 
   function dismiss() {
-    localStorage.setItem(DISMISSED_KEY, '1');
     setShow(false);
   }
 
@@ -47,7 +41,6 @@ export default function WelcomeModal() {
       return;
     }
     setWriteToken(t);
-    localStorage.setItem(DISMISSED_KEY, '1');
     setShow(false);
   }
 
