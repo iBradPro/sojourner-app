@@ -87,16 +87,7 @@ export default function WelcomeModal() {
 
         <div className="text-center space-y-1">
           <p className="text-slate-500 text-xs">
-            Don't have a token?{' '}
-            <a
-              href="https://sojourner.simcentral.org/extensions/nova_ext_sim_central/Manage/api_tokens"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-500 underline"
-            >
-              Generate one here
-            </a>{' '}
-            or ask your GM for a setup link.
+            Don't have a token? Ask your GM for a setup link.
           </p>
           <button
             onClick={dismiss}

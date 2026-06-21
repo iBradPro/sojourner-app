@@ -45,41 +45,8 @@ export default function WriteSetup() {
         </p>
       </div>
 
-      <ol className="space-y-4 text-sm text-slate-300">
-        <li className="flex gap-3">
-          <span className="text-sky-500 font-bold shrink-0">1.</span>
-          <span>
-            Go to{' '}
-            <a
-              href="https://sojourner.simcentral.org/extensions/nova_ext_sim_central/Manage/api_tokens"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-400 underline"
-            >
-              Sojourner API Tokens
-            </a>{' '}
-            and create a new token.
-          </span>
-        </li>
-        <li className="flex gap-3">
-          <span className="text-sky-500 font-bold shrink-0">2.</span>
-          <span>
-            Select <strong className="text-slate-100">your name</strong> in the user dropdown, then enable these scopes:{' '}
-            <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">posts:read.own</code>{' '}
-            <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">posts:write</code>{' '}
-            <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">posts:delete</code>{' '}
-            <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">characters:read</code>{' '}
-            <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">missions:read</code>
-          </span>
-        </li>
-        <li className="flex gap-3">
-          <span className="text-sky-500 font-bold shrink-0">3.</span>
-          <span>Copy the token and paste it below.</span>
-        </li>
-      </ol>
-
       <div className="bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-400">
-        Not sure how? Ask the GM to send you a setup link instead.
+        Your GM will send you a setup link. If you received one, tap it and you'll be set up automatically. Or paste your token below if you have one.
       </div>
 
       {error && (
