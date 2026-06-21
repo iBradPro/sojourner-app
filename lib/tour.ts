@@ -15,6 +15,7 @@ export interface TourDetail {
   description: string;
   location: string;
   image: string | null;
+  images: string[];
 }
 
 // Hardcoded from the tour index page — avoids a slow scrape on every render
@@ -131,18 +132,20 @@ export async function getTourDetail(id: number): Promise<TourDetail> {
   const res = await fetch(`${BASE}/sim/tour/${id}`, { next: { revalidate: 86400 } });
   const html = await res.text();
 
-  const nameMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/i) ??
-    html.match(/<title>([^|<]+)/i);
-  const name = nameMatch ? nameMatch[1].trim() : '';
+  const name = '';
 
-  const imgMatch = html.match(/src="(https?:\/\/[^"]*\/tour\/[^"]+)"/i) ??
-    html.match(/src="([^"]*\/images\/tour\/[^"]+)"/i);
-  const image = imgMatch
-    ? (imgMatch[1].startsWith('http') ? imgMatch[1] : `${BASE}${imgMatch[1]}`)
-    : null;
+  // All image hrefs in the gallery
+  const imgMatches = [...html.matchAll(/href="(https?:\/\/[^"]*\/tour\/[^"]+)"/gi)];
+  const images = imgMatches.map(m => m[1]);
+  const image = images[0] ?? null;
 
-  const description = '';
-  const location = '';
+  // Description is in <p> immediately after the Summary subhead
+  const descMatch = html.match(/<h2[^>]*>Summary<\/h2><p[^>]*>([\s\S]*?)<\/p>/i);
+  const description = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').trim() : '';
 
-  return { name, description, location, image };
+  // Location from the table
+  const locMatch = html.match(/<td class="cell-label">Location<\/td>[\s\S]*?<td>([\s\S]*?)<\/td>/i);
+  const location = locMatch ? locMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+
+  return { name, description, location, image, images };
 }

@@ -1,5 +1,5 @@
 import { getTourDetail, TOUR_SECTIONS } from '@/lib/tour';
-import Image from 'next/image';
+import ImageGallery from '@/components/ImageGallery';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -14,28 +14,18 @@ export default async function TourDetailPage({ params }: { params: Promise<{ id:
   const detail = await getTourDetail(numId);
 
   return (
-    <div className="pb-6">
-      {detail.image && (
-        <div className="relative w-full h-56">
-          <Image
-            src={detail.image}
-            alt={loc.name}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950" />
-        </div>
-      )}
-      <div className="px-4 py-5 space-y-4">
-        <div>
-          <Link href="/tour" className="text-xs text-sky-500 hover:text-sky-400">← Ship Tour</Link>
-          <h1 className="text-xl font-bold text-sky-400 mt-1">{loc.name}</h1>
-          {section && (
-            <p className="text-slate-500 text-xs mt-0.5">{section.title}</p>
-          )}
-        </div>
+    <div className="px-4 py-5 pb-6 space-y-5">
+      <div>
+        <Link href="/tour" className="text-xs text-sky-500 hover:text-sky-400">← Ship Tour</Link>
+        <h1 className="text-xl font-bold text-sky-400 mt-1">{loc.name}</h1>
+        <p className="text-slate-500 text-xs mt-0.5">{section?.title}</p>
       </div>
+
+      <ImageGallery images={detail.images} name={loc.name} />
+
+      {detail.description && (
+        <p className="text-slate-300 text-sm leading-relaxed">{detail.description}</p>
+      )}
     </div>
   );
 }

@@ -59,6 +59,7 @@ export default async function Home() {
         )}
 
         <section>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">SOJO Stats</h2>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
               <p className="text-3xl font-bold text-sky-400">{recentPosts.total}</p>
@@ -82,7 +83,7 @@ export default async function Home() {
             </div>
             <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
               <p className="text-3xl font-bold text-sky-400">{booksWritten}</p>
-              <p className="text-xs text-slate-500 mt-1">Books Written Together</p>
+              <p className="text-xs text-slate-500 mt-1">Books Written</p>
             </div>
           </div>
         </section>
