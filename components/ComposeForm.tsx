@@ -1,8 +1,75 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MyCharacter, Mission, Post } from '@/lib/api';
 import { getWriteToken } from '@/lib/token';
+
+function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
+  allCharacters: MyCharacter[];
+  selectedIds: number[];
+  onAdd: (id: number) => void;
+  onRemove: (id: number) => void;
+}) {
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const added = allCharacters.filter(c => selectedIds.includes(c.id));
+  const filtered = useMemo(() =>
+    allCharacters
+      .filter(c => c.name && !selectedIds.includes(c.id))
+      .filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+      .slice(0, 20),
+    [allCharacters, selectedIds, search]
+  );
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  return (
+    <div className="space-y-2">
+      {added.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {added.map(c => (
+            <span key={c.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-slate-600 text-slate-100">
+              {c.name}
+              <button type="button" onClick={() => onRemove(c.id)} className="ml-1 text-slate-300 hover:text-white leading-none">×</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div ref={ref} className="relative">
+        <input
+          type="text"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          placeholder="+ Add co-author…"
+          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-600 text-sm"
+        />
+        {open && filtered.length > 0 && (
+          <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-xl max-h-48 overflow-y-auto">
+            {filtered.map(c => (
+              <button
+                key={c.id}
+                type="button"
+                onMouseDown={e => { e.preventDefault(); onAdd(c.id); setSearch(''); setOpen(false); }}
+                className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 async function proxyRequest(path: string, method: string, body?: Record<string, unknown>) {
   const token = getWriteToken();
@@ -135,32 +202,12 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
           ))}
         </div>
         {allCharacters.length > 0 && (
-          <div className="space-y-2">
-            {selectedAuthors.filter(id => !myCharIds.has(id)).length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {selectedAuthors.filter(id => !myCharIds.has(id)).map(id => {
-                  const c = allCharacters.find(c => c.id === id);
-                  if (!c) return null;
-                  return (
-                    <span key={id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-slate-600 text-slate-100">
-                      {c.name}
-                      <button type="button" onClick={() => toggleAuthor(id)} className="ml-1 text-slate-300 hover:text-white leading-none">×</button>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-            <select
-              value=""
-              onChange={e => { if (e.target.value) toggleAuthor(Number(e.target.value)); }}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-400 focus:outline-none focus:border-sky-600 text-sm"
-            >
-              <option value="">+ Add co-author…</option>
-              {allCharacters.filter(c => !selectedAuthors.includes(c.id)).map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+          <CoAuthorPicker
+            allCharacters={allCharacters}
+            selectedIds={selectedAuthors}
+            onAdd={id => toggleAuthor(id)}
+            onRemove={id => toggleAuthor(id)}
+          />
         )}
       </div>
 
