@@ -118,7 +118,7 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
 
       <div>
         <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 block mb-2">Characters</label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-2">
           {myCharacters.map(c => (
             <button
               key={c.id}
@@ -133,26 +133,35 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
               {c.name}
             </button>
           ))}
-          {allCharacters.length > 0 && (
-            <>
-              <div className="w-full border-t border-slate-700 my-1" />
-              {allCharacters.map(c => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => toggleAuthor(c.id)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    selectedAuthors.includes(c.id)
-                      ? 'bg-sky-700 text-sky-100'
-                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                  }`}
-                >
-                  {c.name}
-                </button>
-              ))}
-            </>
-          )}
         </div>
+        {allCharacters.length > 0 && (
+          <div className="space-y-2">
+            {selectedAuthors.filter(id => !myCharIds.has(id)).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {selectedAuthors.filter(id => !myCharIds.has(id)).map(id => {
+                  const c = allCharacters.find(c => c.id === id);
+                  if (!c) return null;
+                  return (
+                    <span key={id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-slate-600 text-slate-100">
+                      {c.name}
+                      <button type="button" onClick={() => toggleAuthor(id)} className="ml-1 text-slate-300 hover:text-white leading-none">×</button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+            <select
+              value=""
+              onChange={e => { if (e.target.value) toggleAuthor(Number(e.target.value)); }}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-400 focus:outline-none focus:border-sky-600 text-sm"
+            >
+              <option value="">+ Add co-author…</option>
+              {allCharacters.filter(c => !selectedAuthors.includes(c.id)).map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div>
