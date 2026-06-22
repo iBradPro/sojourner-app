@@ -64,7 +64,7 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
             proxyFetch<{ data: (MyCharacter & { display_name?: string })[] }>('/characters', token!, { per_page: '200', status: 'npc' }).catch(() => ({ data: [] })),
           ]).then(([pcs, npcs]) => ({ data: [...pcs.data, ...npcs.data] })),
         ]);
-        const mine = [...me.characters.pc, ...me.characters.npc];
+        const mine = [...me.characters.pc, ...me.characters.npc].sort((a, b) => a.name.localeCompare(b.name));
         setMyCharacters(mine);
         const myIds = new Set(mine.map(c => c.id));
         // API returns display_name; normalise to name for consistency

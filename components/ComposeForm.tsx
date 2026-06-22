@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MyCharacter, Mission, Post } from '@/lib/api';
 import { getWriteToken } from '@/lib/token';
+import RichTextEditor from '@/components/RichTextEditor';
 
 function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
   allCharacters: MyCharacter[];
@@ -213,14 +214,7 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
 
       <div>
         <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 block mb-1">Content</label>
-        <textarea
-          value={body}
-          onChange={e => setBody(e.target.value)}
-          placeholder="Write your post..."
-          rows={16}
-          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-sky-600 resize-none leading-relaxed"
-        />
-        <p className="text-xs text-slate-600 mt-1">{body.length} characters</p>
+        <RichTextEditor value={body} onChange={setBody} placeholder="Write your post..." />
       </div>
 
       <div className="flex gap-3 pb-4">
