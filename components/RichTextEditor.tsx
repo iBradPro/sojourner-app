@@ -101,7 +101,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
   return (
     <div>
       <style>{`.rte:empty:before{content:attr(data-placeholder);color:rgb(71 85 105);pointer-events:none;}`}</style>
-      <div className="flex gap-1 mb-2">
+      <div className="sticky top-0 z-20 flex gap-1 mb-2 py-2 bg-slate-950/90 backdrop-blur-sm">
         <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('bold')} className={`${btn} font-bold`} title="Bold (⌘B)">B</button>
         <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('italic')} className={`${btn} italic`} title="Italic (⌘I)">I</button>
         <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('underline')} className={`${btn} underline`} title="Underline (⌘U)">U</button>
