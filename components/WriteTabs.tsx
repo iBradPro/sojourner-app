@@ -70,7 +70,7 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
         // API returns display_name; normalise to name for consistency
         const normalise = (c: MyCharacter & { display_name?: string }) =>
           ({ ...c, name: c.name || c.display_name || '' });
-        setAllCharacters(charsRes.data.filter(c => !myIds.has(c.id)).map(normalise));
+        setAllCharacters(charsRes.data.filter(c => !myIds.has(c.id)).map(normalise).sort((a, b) => a.name.localeCompare(b.name)));
         setMissions(missionsRes.data);
         setDrafts(draftsRes.data);
         setIsGM(me.scopes.includes('posts:read.all') || me.user.is_sysadmin);
