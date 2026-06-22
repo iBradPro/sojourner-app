@@ -143,8 +143,8 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
                   onClick={() => toggleAuthor(c.id)}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     selectedAuthors.includes(c.id)
-                      ? 'bg-slate-500 text-slate-100'
-                      : 'bg-slate-800/50 text-slate-500 hover:bg-slate-700 hover:text-slate-300'
+                      ? 'bg-sky-700 text-sky-100'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                   }`}
                 >
                   {c.name}
