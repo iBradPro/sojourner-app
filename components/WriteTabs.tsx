@@ -59,12 +59,18 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
           proxyFetch<{ user: { is_sysadmin: boolean }; characters: { pc: MyCharacter[]; npc: MyCharacter[] }; scopes: string[] }>('/me', token!),
           proxyFetch<{ data: Mission[] }>('/missions', token!, { per_page: '100' }),
           proxyFetch<{ data: Post[] }>('/posts', token!, { status: 'saved', per_page: '50' }),
-          proxyFetch<{ data: MyCharacter[] }>('/characters', token!, { per_page: '200', status: 'active' }).catch(() => ({ data: [] as MyCharacter[] })),
+          Promise.all([
+            proxyFetch<{ data: (MyCharacter & { display_name?: string })[] }>('/characters', token!, { per_page: '200', status: 'active' }).catch(() => ({ data: [] })),
+            proxyFetch<{ data: (MyCharacter & { display_name?: string })[] }>('/characters', token!, { per_page: '200', status: 'npc' }).catch(() => ({ data: [] })),
+          ]).then(([pcs, npcs]) => ({ data: [...pcs.data, ...npcs.data] })),
         ]);
         const mine = [...me.characters.pc, ...me.characters.npc];
         setMyCharacters(mine);
         const myIds = new Set(mine.map(c => c.id));
-        setAllCharacters(charsRes.data.filter(c => !myIds.has(c.id)));
+        // API returns display_name; normalise to name for consistency
+        const normalise = (c: MyCharacter & { display_name?: string }) =>
+          ({ ...c, name: c.name || c.display_name || '' });
+        setAllCharacters(charsRes.data.filter(c => !myIds.has(c.id)).map(normalise));
         setMissions(missionsRes.data);
         setDrafts(draftsRes.data);
         setIsGM(me.scopes.includes('posts:read.all') || me.user.is_sysadmin);
