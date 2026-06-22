@@ -32,7 +32,8 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
 
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
-  const [characters, setCharacters] = useState<MyCharacter[]>([]);
+  const [myCharacters, setMyCharacters] = useState<MyCharacter[]>([]);
+  const [allCharacters, setAllCharacters] = useState<MyCharacter[]>([]);
   const [missions, setMissions] = useState<Mission[]>([]);
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [isGM, setIsGM] = useState(false);
@@ -54,12 +55,16 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
 
     async function fetchData() {
       try {
-        const [me, missionsRes, draftsRes] = await Promise.all([
+        const [me, missionsRes, draftsRes, charsRes] = await Promise.all([
           proxyFetch<{ user: { is_sysadmin: boolean }; characters: { pc: MyCharacter[]; npc: MyCharacter[] }; scopes: string[] }>('/me', token!),
           proxyFetch<{ data: Mission[] }>('/missions', token!, { per_page: '100' }),
           proxyFetch<{ data: Post[] }>('/posts', token!, { status: 'saved', per_page: '50' }),
+          proxyFetch<{ data: MyCharacter[] }>('/characters', token!, { per_page: '200', status: 'active' }).catch(() => ({ data: [] as MyCharacter[] })),
         ]);
-        setCharacters([...me.characters.pc, ...me.characters.npc]);
+        const mine = [...me.characters.pc, ...me.characters.npc];
+        setMyCharacters(mine);
+        const myIds = new Set(mine.map(c => c.id));
+        setAllCharacters(charsRes.data.filter(c => !myIds.has(c.id)));
         setMissions(missionsRes.data);
         setDrafts(draftsRes.data);
         setIsGM(me.scopes.includes('posts:read.all') || me.user.is_sysadmin);
@@ -75,8 +80,8 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
     fetchData();
   }, [magicToken]);
 
-  const myCharNames = new Set(characters.map(c => c.name));
-  const myCharIds = new Set(characters.map(c => String(c.id)));
+  const myCharNames = new Set(myCharacters.map(c => c.name));
+  const myCharIds = new Set(myCharacters.map(c => String(c.id)));
   const myDrafts = drafts.filter(d => {
     const parts = d.authors?.split(',').map(s => s.trim()) ?? [];
     return parts.some(a => myCharNames.has(a) || myCharIds.has(a));
@@ -139,7 +144,8 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
       {tab === 'new' && (
         <ComposeForm
           key={activeDraft?.id ?? 'new'}
-          characters={characters}
+          myCharacters={myCharacters}
+          allCharacters={allCharacters}
           missions={missions}
           draft={activeDraft ?? undefined}
         />

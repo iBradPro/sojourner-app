@@ -17,13 +17,16 @@ async function proxyRequest(path: string, method: string, body?: Record<string, 
 }
 
 interface Props {
-  characters: MyCharacter[];
+  myCharacters: MyCharacter[];
+  allCharacters: MyCharacter[];
   missions: Mission[];
   draft?: Post;
 }
 
-export default function ComposeForm({ characters, missions, draft }: Props) {
+export default function ComposeForm({ myCharacters, allCharacters, missions, draft }: Props) {
   const router = useRouter();
+  const allChars = [...myCharacters, ...allCharacters];
+  const myCharIds = new Set(myCharacters.map(c => c.id));
   const [title, setTitle] = useState(draft?.title ?? '');
   const [body, setBody] = useState(draft?.content ?? '');
   const [missionId, setMissionId] = useState<string>(
@@ -34,7 +37,7 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
   const [selectedAuthors, setSelectedAuthors] = useState<number[]>(() => {
     if (!draft) return [];
     const parts = draft.authors?.split(',').map(s => s.trim()) ?? [];
-    return characters.filter(c => parts.includes(String(c.id)) || parts.includes(c.name)).map(c => c.id);
+    return allChars.filter(c => parts.includes(String(c.id)) || parts.includes(c.name)).map(c => c.id);
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -53,8 +56,8 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
       setError('Title and content are required.');
       return;
     }
-    if (selectedAuthors.length === 0) {
-      setError('At least one character must be selected.');
+    if (selectedAuthors.length === 0 || !selectedAuthors.some(id => myCharIds.has(id))) {
+      setError('At least one of your own characters must be selected.');
       return;
     }
     setSaving(true);
@@ -116,7 +119,7 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
       <div>
         <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 block mb-2">Characters</label>
         <div className="flex flex-wrap gap-2">
-          {characters.map(c => (
+          {myCharacters.map(c => (
             <button
               key={c.id}
               type="button"
@@ -130,6 +133,25 @@ export default function ComposeForm({ characters, missions, draft }: Props) {
               {c.name}
             </button>
           ))}
+          {allCharacters.length > 0 && (
+            <>
+              <div className="w-full border-t border-slate-700 my-1" />
+              {allCharacters.map(c => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => toggleAuthor(c.id)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedAuthors.includes(c.id)
+                      ? 'bg-slate-500 text-slate-100'
+                      : 'bg-slate-800/50 text-slate-500 hover:bg-slate-700 hover:text-slate-300'
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
