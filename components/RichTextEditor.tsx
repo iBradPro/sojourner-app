@@ -130,7 +130,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
         onPaste={handlePaste}
         data-placeholder={placeholder}
         className={`rte w-full min-h-[16rem] px-4 py-3 leading-relaxed focus:outline-none ${EDITOR_SIZES[sizeIndex]}`}
-        style={{ background: '#0d0d0d', border: '1px solid #3a2a0a', borderRadius: '0 0.75rem 0.75rem 0', color: '#e8e0d0' }}
+        style={{ background: '#0d0d0d', border: '2px solid #FF9900', borderRadius: '0 0.75rem 0.75rem 0', color: '#e8e0d0' }}
       />
     </div>
   );
