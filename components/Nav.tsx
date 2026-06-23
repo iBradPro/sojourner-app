@@ -63,7 +63,7 @@ export default function Nav() {
   const path = usePathname();
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ background: '#000', borderTop: '2px solid #9999CC' }}>
-      <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex items-center gap-0.5 px-1 py-1.5">
+      <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex items-center gap-0 px-0.5 py-1.5">
         {links.map(({ href, label, icon }) => {
           const active = href === '/' ? path === '/' : path.startsWith(href);
           const color = active ? '#000' : '#9999CC';
@@ -71,8 +71,8 @@ export default function Nav() {
             <Link
               key={href}
               href={href}
-              className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full text-xs font-bold tracking-wide transition-colors"
-              style={active ? { background: '#FF9900', color: '#000' } : { color: '#9999CC' }}
+              className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full font-bold tracking-wide transition-colors"
+              style={active ? { background: '#FF9900', color: '#000', fontSize: '10px' } : { color: '#9999CC', fontSize: '10px' }}
             >
               {icon(color)}
               {label}
