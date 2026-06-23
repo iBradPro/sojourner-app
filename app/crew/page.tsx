@@ -1,8 +1,6 @@
 export const revalidate = 3600;
 
 import { api } from '@/lib/api';
-import { scrapeCharacterProfile, getDepartment, DEPARTMENT_ORDER } from '@/lib/utils';
-import CharacterImageViewer from '@/components/CharacterImageViewer';
 import Link from 'next/link';
 
 export default async function CrewPage() {
@@ -12,82 +10,38 @@ export default async function CrewPage() {
     fetch('https://sojourner.simcentral.org/personnel/index', { next: { revalidate: 3600 } }).then(r => r.text()),
   ]);
 
-  // Use the manifest as the source of truth for who's actually on the crew
   const manifestIds = new Set(
     [...manifestHtml.matchAll(/personnel\/character\/(\d+)/g)].map(m => Number(m[1]))
   );
 
-  const allChars = [...active.data, ...npcs.data].filter(c => manifestIds.has(c.id));
-
-  // Fetch image + position for all crew in parallel (cached 1hr)
-  const profiles = await Promise.all(
-    allChars.map(c => scrapeCharacterProfile(c.id).catch(() => ({ imageUrl: null, position: null, sections: [] })))
-  );
-
-  // Group by department
-  const grouped = new Map<string, { char: typeof allChars[0]; imageUrl: string | null; position: string | null }[]>();
-  allChars.forEach((char, i) => {
-    const { imageUrl, position } = profiles[i];
-    const dept = getDepartment(position);
-    if (!grouped.has(dept)) grouped.set(dept, []);
-    grouped.get(dept)!.push({ char, imageUrl, position });
-  });
-
-  // Sort each department: chief first, assistant chief second, then alphabetical
-  function rankPosition(position: string | null): number {
-    if (!position) return 2;
-    const p = position.toLowerCase();
-    if (/assistant chief|asst\.? chief|deputy chief/.test(p)) return 1;
-    if (/chief|commanding officer|captain|executive officer|first officer|\bxo\b/.test(p)) return 0;
-    return 2;
-  }
-
-  for (const members of grouped.values()) {
-    members.sort((a, b) => {
-      const diff = rankPosition(a.position) - rankPosition(b.position);
-      if (diff !== 0) return diff;
-      return (a.char.preferred_name ?? '').localeCompare(b.char.preferred_name ?? '');
-    });
-  }
-
-  // Sort departments by canonical order
-  const departments = DEPARTMENT_ORDER.filter(d => grouped.has(d));
+  const allChars = [...active.data, ...npcs.data]
+    .filter(c => manifestIds.has(c.id))
+    .sort((a, b) => (a.preferred_name ?? '').localeCompare(b.preferred_name ?? ''));
 
   return (
-    <div className="px-4 py-6 space-y-6">
+    <div className="px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold" style={{ color: '#BBAADD' }}>Crew Manifest</h1>
         <span className="text-xs" style={{ color: '#9999CC' }}>{allChars.length} crew</span>
       </div>
 
-      {departments.map(dept => (
-        <section key={dept}>
-          <h2 className="lcars-label mb-3">{dept}</h2>
-          <ul className="space-y-2">
-            {grouped.get(dept)!.map(({ char, imageUrl, position }) => {
-              const initial = (char.preferred_name ?? char.first_name ?? '?')[0];
-              return (
-                <li key={char.id}>
-                  <Link href={`/crew/${char.id}`} className="lcars-card flex items-center gap-3 p-3">
-                    {imageUrl ? (
-                      <CharacterImageViewer src={imageUrl} alt={char.preferred_name ?? ''} size="list" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
-                        style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
-                        {initial}
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="font-medium truncate" style={{ color: '#FFCC99' }}>{char.preferred_name}</p>
-                      {position && <p className="text-xs truncate mt-0.5" style={{ color: '#9999CC' }}>{position}</p>}
-                    </div>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
+      <ul className="space-y-2">
+        {allChars.map(char => {
+          const name = char.preferred_name ?? [char.first_name, char.last_name].filter(Boolean).join(' ') ?? '?';
+          const initial = name[0];
+          return (
+            <li key={char.id}>
+              <Link href={`/crew/${char.id}`} className="lcars-card flex items-center gap-3 p-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
+                  style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
+                  {initial}
+                </div>
+                <p className="font-medium truncate" style={{ color: '#FFCC99' }}>{name}</p>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
