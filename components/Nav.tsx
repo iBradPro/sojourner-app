@@ -6,12 +6,12 @@ import { PenLine, Rocket, Users, SlidersHorizontal } from 'lucide-react';
 function DoorsIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      {/* Outer frame — rounded top, flat bottom */}
-      <path d="M3 22 L3 5 Q3 2 6 2 L18 2 Q21 2 21 5 L21 22 Z" />
+      {/* Outer border/surround */}
+      <rect x="1.5" y="1.5" width="21" height="21" rx="2" />
+      {/* Door frame — rounded top */}
+      <path d="M4 22 L4 6 Q4 3.5 6.5 3.5 L17.5 3.5 Q20 3.5 20 6 L20 22 Z" />
       {/* Center vertical seam */}
-      <line x1="12" y1="2" x2="12" y2="22" />
-      {/* Horizontal accent stripe across both panels */}
-      <line x1="3" y1="9" x2="21" y2="9" />
+      <line x1="12" y1="3.5" x2="12" y2="22" />
     </svg>
   );
 }
