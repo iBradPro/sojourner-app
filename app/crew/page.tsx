@@ -1,3 +1,5 @@
+export const revalidate = 3600;
+
 import { api } from '@/lib/api';
 import { scrapeCharacterProfile, getDepartment, DEPARTMENT_ORDER } from '@/lib/utils';
 import CharacterImageViewer from '@/components/CharacterImageViewer';
