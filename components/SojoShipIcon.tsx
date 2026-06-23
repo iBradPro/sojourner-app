@@ -8,7 +8,7 @@ export default function SojoShipIcon({ size = 24, color = 'currentColor', stroke
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="-1 -1 26 26"
       fill="none"
       stroke={color}
       strokeWidth={strokeWidth}

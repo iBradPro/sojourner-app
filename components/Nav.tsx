@@ -51,12 +51,12 @@ function WarpCoreIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) 
 }
 
 const links = [
-  { href: '/',        label: 'Home',     icon: (c: string) => <DoorsIcon      size={20} strokeWidth={1.5} color={c} /> },
-  { href: '/compose', label: 'Write',    icon: (c: string) => <PenLine        size={20} strokeWidth={1.5} color={c} /> },
-  { href: '/posts',   label: 'Posts',    icon: (c: string) => <PaddIcon       size={20} strokeWidth={1.5} color={c} /> },
-  { href: '/tour',    label: 'Tour',     icon: (c: string) => <SojoShipIcon   size={20} strokeWidth={1.5} color={c} /> },
-  { href: '/crew',    label: 'Crew',     icon: (c: string) => <Users          size={20} strokeWidth={1.5} color={c} /> },
-  { href: '/settings',label: 'Settings', icon: (c: string) => <WarpCoreIcon  size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/',        label: 'Home',     icon: (c: string) => <DoorsIcon      size={18} strokeWidth={1.5} color={c} /> },
+  { href: '/compose', label: 'Write',    icon: (c: string) => <PenLine        size={18} strokeWidth={1.5} color={c} /> },
+  { href: '/posts',   label: 'Posts',    icon: (c: string) => <PaddIcon       size={18} strokeWidth={1.5} color={c} /> },
+  { href: '/tour',    label: 'Tour',     icon: (c: string) => <SojoShipIcon   size={18} strokeWidth={1.5} color={c} /> },
+  { href: '/crew',    label: 'Crew',     icon: (c: string) => <Users          size={18} strokeWidth={1.5} color={c} /> },
+  { href: '/settings',label: 'Settings', icon: (c: string) => <WarpCoreIcon  size={18} strokeWidth={1.5} color={c} /> },
 ];
 
 export default function Nav() {
