@@ -14,7 +14,7 @@ const FIELD_INPUT = {
 
 const FIELD_FOCUS_CLASS = 'focus:outline-none';
 
-function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
+function CharacterPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
   allCharacters: MyCharacter[];
   selectedIds: number[];
   onAdd: (id: number) => void;
@@ -29,7 +29,7 @@ function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
     allCharacters
       .filter(c => c.name && !selectedIds.includes(c.id))
       .filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
-      .slice(0, 20),
+      .slice(0, 30),
     [allCharacters, selectedIds, search]
   );
 
@@ -47,9 +47,9 @@ function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
         <div className="flex flex-wrap gap-2">
           {added.map(c => (
             <span key={c.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium"
-              style={{ background: '#1a1030', color: '#BBAADD', border: '1px solid #6666AA' }}>
+              style={{ background: '#3a1f00', color: '#FFCC99', border: '2px solid #FF9900' }}>
               {c.name}
-              <button type="button" onClick={() => onRemove(c.id)} className="ml-1 leading-none" style={{ color: '#9999CC' }}>×</button>
+              <button type="button" onClick={() => onRemove(c.id)} className="ml-1 leading-none" style={{ color: '#FF9900' }}>×</button>
             </span>
           ))}
         </div>
@@ -60,7 +60,7 @@ function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
           value={search}
           onChange={e => { setSearch(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
-          placeholder="+ Add co-author…"
+          placeholder="+ Add Character…"
           className={`w-full px-4 py-2.5 text-sm ${FIELD_FOCUS_CLASS}`}
           style={{ ...FIELD_INPUT, borderRadius: '0 0.75rem 0.75rem 0' }}
         />
@@ -203,29 +203,12 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
 
       <div>
         <label className="lcars-label mb-2">Characters</label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {myCharacters.map(c => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => toggleAuthor(c.id)}
-              className="px-3 py-1.5 rounded-full text-sm font-bold transition-colors"
-              style={selectedAuthors.includes(c.id)
-                ? { background: '#BBAADD', color: '#000' }
-                : { background: '#0d0a1a', color: '#9999CC', border: '1px solid #3a3560' }}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-        {allCharacters.length > 0 && (
-          <CoAuthorPicker
-            allCharacters={allCharacters}
-            selectedIds={selectedAuthors}
-            onAdd={id => toggleAuthor(id)}
-            onRemove={id => toggleAuthor(id)}
-          />
-        )}
+        <CharacterPicker
+          allCharacters={allChars}
+          selectedIds={selectedAuthors}
+          onAdd={id => toggleAuthor(id)}
+          onRemove={id => toggleAuthor(id)}
+        />
       </div>
 
       <div>

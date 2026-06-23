@@ -37,7 +37,7 @@
     display: inline-block;
     width: 0.75rem;
     height: 1.1rem;
-    background: var(--lcars-lavender);
+    background: var(--lcars-orange);
     border-radius: 999px 0 0 999px;
     margin-right: 0.5rem;
     flex-shrink: 0;
@@ -47,9 +47,9 @@
     display: block;
     flex: 1;
     height: 2px;
-    background: var(--lcars-lavender);
+    background: var(--lcars-purple);
     margin-left: 0.5rem;
-    opacity: 0.35;
+    opacity: 0.5;
   }
 
   /* ── LCARS card ─────────────────────────────────────── */
