@@ -21,7 +21,7 @@ export default async function MissionsPage() {
         return (
           <section key={status}>
             <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3 capitalize">{status}</h2>
-            <ul className="space-y-2">
+            <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
               {list.map((mission) => (
                 <li key={mission.id}>
                   <Link href={`/missions/${mission.id}`} className="block bg-slate-900 rounded-xl p-4 border border-slate-800 hover:border-sky-700 transition-colors">

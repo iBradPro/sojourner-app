@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className="h-full bg-slate-950 text-slate-100 font-sans">
-        <div className="flex flex-col min-h-full max-w-2xl mx-auto">
+        <div className="flex flex-col min-h-full max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto">
           <WelcomeModal />
           <main className="flex-1 pb-20">{children}</main>
           <Nav />

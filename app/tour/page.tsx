@@ -8,7 +8,7 @@ export default function TourPage() {
       {TOUR_SECTIONS.map(section => (
         <section key={section.title}>
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">{section.title}</h2>
-          <div className="space-y-1">
+          <div className="space-y-1 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-2 md:space-y-0">
             {section.locations.map(loc => (
               <Link
                 key={loc.id}

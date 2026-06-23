@@ -11,7 +11,7 @@ export default async function CrewPage() {
         <span className="text-xs text-slate-500">{crew.total} active</span>
       </div>
 
-      <ul className="space-y-2">
+      <ul className="space-y-2 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 md:space-y-0">
         {crew.data.map((char) => (
           <li key={char.id}>
             <Link href={`/crew/${char.id}`} className="flex items-center gap-3 bg-slate-900 rounded-xl p-4 border border-slate-800 hover:border-sky-700 transition-colors">

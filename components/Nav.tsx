@@ -16,7 +16,7 @@ export default function Nav() {
   const path = usePathname();
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 z-50">
-      <div className="max-w-2xl mx-auto flex">
+      <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex">
         {links.map(({ href, label, icon }) => {
           const active = href === '/' ? path === '/' : path.startsWith(href);
           return (

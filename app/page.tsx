@@ -24,19 +24,16 @@ export default async function Home() {
 
   return (
     <div className="space-y-8 pb-6">
-      <div className="relative w-full h-48">
+      <div className="relative w-full aspect-[3/1]">
         <Image
-          src="https://sojourner.simcentral.org/application/assets/images/tour/Sojo111.png"
-          alt="USS Sojourner"
+          src="https://sojourner.simcentral.org/application/views/lcars/main/images/head-img.png"
+          alt="USS Sojourner NCC-85748"
           fill
           className="object-cover"
           priority
+          sizes="(max-width: 768px) 100vw, 1024px"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950" />
-        <div className="absolute bottom-0 left-0 px-4 pb-3">
-          <h1 className="text-2xl font-bold text-sky-400">USS Sojourner</h1>
-          <p className="text-slate-400 text-sm">NCC-85748 · Rhode Island-class</p>
-        </div>
       </div>
 
       <div className="px-4 space-y-8">
@@ -60,7 +57,7 @@ export default async function Home() {
 
         <section>
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">SOJO Stats</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center">
               <p className="text-3xl font-bold text-sky-400">{booksWritten}</p>
               <p className="text-xs text-slate-500 mt-1">Books Written</p>

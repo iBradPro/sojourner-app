@@ -20,7 +20,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
         <span className="text-xs text-slate-500">{posts.total} total</span>
       </div>
 
-      <ul className="space-y-2">
+      <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
         {posts.data.map((post) => (
           <li key={post.id}>
             <Link href={`/posts/${post.id}`} className="block bg-slate-900 rounded-xl p-4 border border-slate-800 hover:border-sky-700 transition-colors">
