@@ -6,11 +6,15 @@ import { Home, PenLine, Rocket, Users, SlidersHorizontal } from 'lucide-react';
 function PaddIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="2" width="16" height="20" rx="2" />
-      <line x1="7.5" y1="8"  x2="16.5" y2="8" />
-      <line x1="7.5" y1="11" x2="16.5" y2="11" />
-      <line x1="7.5" y1="14" x2="16.5" y2="14" />
-      <line x1="7.5" y1="17" x2="13"   y2="17" />
+      {/* Tablet body */}
+      <rect x="3" y="1.5" width="18" height="21" rx="2.5" />
+      {/* Screen bezel */}
+      <rect x="5.5" y="4" width="13" height="14.5" rx="1" />
+      {/* Text lines inside screen */}
+      <line x1="7.5" y1="7.5"  x2="16.5" y2="7.5" />
+      <line x1="7.5" y1="10.5" x2="16.5" y2="10.5" />
+      <line x1="7.5" y1="13.5" x2="16.5" y2="13.5" />
+      <line x1="7.5" y1="16"   x2="13"   y2="16" />
     </svg>
   );
 }
