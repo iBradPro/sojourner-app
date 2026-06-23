@@ -7,7 +7,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const charId = Number(id);
 
-  const [char, profile] = await Promise.all([
+  const [char, { sections: profile, imageUrl }] = await Promise.all([
     api.character(charId).catch(() => null),
     scrapeCharacterProfile(charId),
   ]);
@@ -23,10 +23,16 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
 
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold shrink-0"
-          style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
-          {name[0]}
-        </div>
+        {imageUrl ? (
+          <img src={imageUrl} alt={name}
+            className="w-16 h-16 rounded-full object-cover shrink-0"
+            style={{ border: '2px solid #BBAADD' }} />
+        ) : (
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold shrink-0"
+            style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
+            {name[0]}
+          </div>
+        )}
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#FFCC99' }}>{name}</h1>
           {credentials && <p className="text-sm mt-0.5" style={{ color: '#9999CC' }}>{credentials}</p>}
@@ -42,7 +48,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
       </div>
 
       {/* Profile sections from Nova */}
-      {profile.length > 0 ? (
+      {profile && profile.length > 0 ? (
         <div className="space-y-6">
           {profile.map(section => (
             <section key={section.heading}>

@@ -1,8 +1,14 @@
 import { api } from '@/lib/api';
+import { scrapeCharacterProfile } from '@/lib/utils';
 import Link from 'next/link';
 
 export default async function CrewPage() {
   const crew = await api.characters({ status: 'active', per_page: 100 });
+
+  // Fetch hero images for all crew in parallel (cached 1hr server-side)
+  const images = await Promise.all(
+    crew.data.map(c => scrapeCharacterProfile(c.id).then(p => p.imageUrl).catch(() => null))
+  );
 
   return (
     <div className="px-4 py-6 space-y-4">
@@ -12,20 +18,30 @@ export default async function CrewPage() {
       </div>
 
       <ul className="space-y-2 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 md:space-y-0">
-        {crew.data.map((char) => (
-          <li key={char.id}>
-            <Link href={`/crew/${char.id}`} className="lcars-card flex items-center gap-3 p-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
-                style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
-                {(char.preferred_name ?? char.first_name ?? '?')[0]}
-              </div>
-              <div className="min-w-0">
-                <p className="font-medium truncate" style={{ color: '#FFCC99' }}>{char.preferred_name}</p>
-                <p className="text-xs capitalize" style={{ color: '#9999CC' }}>{char.status}</p>
-              </div>
-            </Link>
-          </li>
-        ))}
+        {crew.data.map((char, i) => {
+          const imageUrl = images[i];
+          const initial = (char.preferred_name ?? char.first_name ?? '?')[0];
+          return (
+            <li key={char.id}>
+              <Link href={`/crew/${char.id}`} className="lcars-card flex items-center gap-3 p-4">
+                {imageUrl ? (
+                  <img src={imageUrl} alt={char.preferred_name ?? ''}
+                    className="w-10 h-10 rounded-full object-cover shrink-0"
+                    style={{ border: '2px solid #BBAADD' }} />
+                ) : (
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
+                    style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
+                    {initial}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="font-medium truncate" style={{ color: '#FFCC99' }}>{char.preferred_name}</p>
+                  <p className="text-xs capitalize" style={{ color: '#9999CC' }}>{char.status}</p>
+                </div>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

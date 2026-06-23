@@ -3,15 +3,23 @@ export interface CharacterProfileSection {
   fields: { label: string; value: string }[];
 }
 
-export async function scrapeCharacterProfile(id: number): Promise<CharacterProfileSection[]> {
+export interface CharacterProfile {
+  sections: CharacterProfileSection[];
+  imageUrl: string | null;
+}
+
+export async function scrapeCharacterProfile(id: number): Promise<CharacterProfile> {
   try {
     const res = await fetch(`https://sojourner.simcentral.org/personnel/character/${id}`, {
       next: { revalidate: 3600 },
     });
-    if (!res.ok) return [];
+    if (!res.ok) return { sections: [], imageUrl: null };
     const html = await res.text();
 
-    // Tab structure: #one=Basic Info, #two=Personal Ties, #three=Personality, #four=Personal History, #five=Service Record
+    // Extract first/hero character image
+    const imgMatch = html.match(/application\/assets\/images\/characters\/[^"']+/);
+    const imageUrl = imgMatch ? `https://sojourner.simcentral.org/${imgMatch[0]}` : null;
+
     const TAB_LABELS: [string, string][] = [
       ['one',   'Basic Info'],
       ['two',   'Personal Ties'],
@@ -30,7 +38,6 @@ export async function scrapeCharacterProfile(id: number): Promise<CharacterProfi
       const next = nextTabPattern.exec(html);
       const chunk = html.slice(start, next ? next.index : start + 20000);
 
-      // Extract all label/value rows from the zebra table
       const rowPattern = /<td class="cell-label[^"]*">([\s\S]*?)<\/td>\s*<td class="cell-spacer"[^>]*><\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/g;
       let m;
       const fields: { label: string; value: string }[] = [];
@@ -50,9 +57,9 @@ export async function scrapeCharacterProfile(id: number): Promise<CharacterProfi
       if (fields.length > 0) sections.push({ heading: tabLabel, fields });
     }
 
-    return sections;
+    return { sections, imageUrl };
   } catch {
-    return [];
+    return { sections: [], imageUrl: null };
   }
 }
 
