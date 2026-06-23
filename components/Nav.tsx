@@ -1,15 +1,16 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Home, ScrollText, PenLine, Ship, Rocket, Users, SlidersHorizontal, type LucideIcon } from 'lucide-react';
 
-const links = [
-  { href: '/', label: 'Home', icon: '🏠' },
-  { href: '/posts', label: 'Posts', icon: '📝' },
-  { href: '/compose', label: 'Write', icon: '✏️' },
-  { href: '/tour', label: 'Tour', icon: '🚢' },
-  { href: '/missions', label: 'Missions', icon: '🚀' },
-  { href: '/crew', label: 'Crew', icon: '👥' },
-  { href: '/settings', label: 'Settings', icon: '⚙️' },
+const links: { href: string; label: string; Icon: LucideIcon }[] = [
+  { href: '/',          label: 'Home',     Icon: Home },
+  { href: '/posts',     label: 'Posts',    Icon: ScrollText },
+  { href: '/compose',   label: 'Write',    Icon: PenLine },
+  { href: '/tour',      label: 'Tour',     Icon: Ship },
+  { href: '/missions',  label: 'Missions', Icon: Rocket },
+  { href: '/crew',      label: 'Crew',     Icon: Users },
+  { href: '/settings',  label: 'Settings', Icon: SlidersHorizontal },
 ];
 
 export default function Nav() {
@@ -17,7 +18,7 @@ export default function Nav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ background: '#000', borderTop: '2px solid #9999CC' }}>
       <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex gap-0.5 px-1 py-1.5">
-        {links.map(({ href, label, icon }) => {
+        {links.map(({ href, label, Icon }) => {
           const active = href === '/' ? path === '/' : path.startsWith(href);
           return (
             <Link
@@ -29,7 +30,7 @@ export default function Nav() {
                 : { background: 'transparent', color: '#9999CC' }
               }
             >
-              <span className="text-base leading-none">{icon}</span>
+              <Icon size={20} strokeWidth={1.5} color="currentColor" />
               {label}
             </Link>
           );
