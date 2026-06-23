@@ -54,7 +54,7 @@ export default async function CrewPage() {
   return (
     <div className="px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold" style={{ color: '#BBAADD' }}>Crew</h1>
+        <h1 className="text-2xl font-bold" style={{ color: '#BBAADD' }}>Crew Manifest</h1>
         <span className="text-xs" style={{ color: '#9999CC' }}>{allChars.length} crew</span>
       </div>
 
