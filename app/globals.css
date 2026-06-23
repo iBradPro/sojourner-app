@@ -69,7 +69,8 @@
 }
 
 /* ── Post content HTML rendering ───────────────────── */
-.post-content p { margin-bottom: 1rem; }
+.post-content p { margin-bottom: 1em !important; margin-top: 0 !important; }
+.post-content p:first-child { margin-top: 0 !important; }
 .post-content i, .post-content em { font-style: italic; color: var(--lcars-lavender); }
 .post-content b, .post-content strong { font-weight: 600; color: var(--lcars-peach); }
 .post-content hr { border-color: #2a2a2a; margin: 1.5rem 0; }
