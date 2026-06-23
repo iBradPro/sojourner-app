@@ -190,23 +190,6 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
                 className="w-full text-left lcars-card px-4 py-4 transition-colors"
               >
                 <p className="font-medium" style={{ color: '#FFCC99' }}>{draft.title || 'Untitled'}</p>
-                {draft.authors && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {draft.authors.split(',').map(a => a.trim()).filter(Boolean).map(rawId => {
-                      const id = Number(rawId);
-                      const name = (!isNaN(id) && charMap.get(id)) || rawId;
-                      return (
-                        <span
-                          key={rawId}
-                          className="text-xs font-medium px-2 py-0.5 rounded-full"
-                          style={{ background: '#1a1030', color: '#BBAADD', border: '1px solid #6666AA' }}
-                        >
-                          {name}
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
                 <p className="text-xs mt-1.5" style={{ color: '#4a4a6a' }}>{new Date(draft.date).toLocaleDateString()}</p>
               </button>
             ))
