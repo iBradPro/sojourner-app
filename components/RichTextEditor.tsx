@@ -109,7 +109,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
 
   return (
     <div>
-      <style>{`.rte:empty:before{content:attr(data-placeholder);color:#4a3a2a;pointer-events:none;}`}</style>
+      <style>{`.rte:empty:before{content:attr(data-placeholder);color:#4a3a2a;pointer-events:none;}.rte>div{margin-bottom:0.75em;}`}</style>
       {/* Toolbar: sticky on scroll. overflow:visible on all ancestors required for sticky to work in Safari. */}
       <div className="sticky top-0 z-20 flex gap-1 mb-2 py-2" style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(4px)' }}>
         <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('bold')} style={{ ...btnStyle, fontWeight: 700, minWidth: '2.25rem' }} title="Bold (⌘B)">B</button>
