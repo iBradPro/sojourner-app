@@ -33,7 +33,7 @@ export default async function Home() {
 
   return (
     <div className="space-y-8 pb-6">
-      <div className="relative w-full aspect-[3/1]">
+      <div className="relative w-full aspect-[6/1]">
         <Image
           src="/sojourner-hero.jpg"
           alt="USS Sojourner NCC-85748"
