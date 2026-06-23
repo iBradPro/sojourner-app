@@ -71,13 +71,11 @@ export default function Nav() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center justify-center gap-1.5 py-2 rounded-full font-bold tracking-wide transition-all ${active ? 'px-4 text-xs' : 'flex-1 text-xs'}`}
-              style={active
-                ? { background: '#BBAADD', color: '#000', flexShrink: 0 }
-                : { color: '#9999CC', flex: 1 }}
+              className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full text-xs font-bold tracking-wide transition-colors"
+              style={active ? { background: '#BBAADD', color: '#000' } : { color: '#9999CC' }}
             >
               {icon(color)}
-              {active && <span>{label}</span>}
+              {label}
             </Link>
           );
         })}
