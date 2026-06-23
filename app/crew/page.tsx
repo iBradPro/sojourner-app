@@ -1,5 +1,6 @@
 import { api } from '@/lib/api';
 import { scrapeCharacterProfile } from '@/lib/utils';
+import CharacterImageViewer from '@/components/CharacterImageViewer';
 import Link from 'next/link';
 
 export default async function CrewPage() {
@@ -25,9 +26,7 @@ export default async function CrewPage() {
             <li key={char.id}>
               <Link href={`/crew/${char.id}`} className="lcars-card flex items-center gap-3 p-4">
                 {imageUrl ? (
-                  <img src={imageUrl} alt={char.preferred_name ?? ''}
-                    className="w-10 h-10 rounded-full object-cover shrink-0"
-                    style={{ border: '2px solid #BBAADD' }} />
+                  <CharacterImageViewer src={imageUrl} alt={char.preferred_name ?? ''} size="list" />
                 ) : (
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
                     style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>

@@ -1,5 +1,6 @@
 import { api } from '@/lib/api';
 import { scrapeCharacterProfile } from '@/lib/utils';
+import CharacterImageViewer from '@/components/CharacterImageViewer';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -24,9 +25,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
       {/* Header */}
       <div className="flex items-center gap-4">
         {imageUrl ? (
-          <img src={imageUrl} alt={name}
-            className="w-16 h-16 rounded-full object-cover shrink-0"
-            style={{ border: '2px solid #BBAADD' }} />
+          <CharacterImageViewer src={imageUrl} alt={name} size="detail" />
         ) : (
           <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold shrink-0"
             style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
