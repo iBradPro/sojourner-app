@@ -64,7 +64,16 @@ const EDITOR_SIZES = ['text-sm', 'text-[15px]', 'text-base', 'text-lg', 'text-xl
 
 export default function RichTextEditor({ value, onChange, placeholder }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const [sizeIndex, setSizeIndex] = useState(1);
+  const [sizeIndex, setSizeIndex] = useState(() => {
+    if (typeof window === 'undefined') return 1;
+    const saved = localStorage.getItem('textSize');
+    return saved !== null ? Number(saved) : 1;
+  });
+
+  function setSize(i: number) {
+    setSizeIndex(i);
+    localStorage.setItem('textSize', String(i));
+  }
 
   // Set initial content once on mount (form remounts per draft via key).
   useEffect(() => {
@@ -116,9 +125,9 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
         <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('italic')} style={{ ...btnStyle, fontStyle: 'italic', minWidth: '2.25rem' }} title="Italic (⌘I)">I</button>
         <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('underline')} style={{ ...btnStyle, textDecoration: 'underline', minWidth: '2.25rem' }} title="Underline (⌘U)">U</button>
         <div style={{ width: '1px', background: '#3a2a0a', margin: '0 4px' }} />
-        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => setSizeIndex(i => Math.max(0, i - 1))} disabled={sizeIndex === 0}
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => setSize(Math.max(0, sizeIndex - 1))} disabled={sizeIndex === 0}
           style={{ ...btnStyle, opacity: sizeIndex === 0 ? 0.3 : 1 }} title="Smaller text">A−</button>
-        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => setSizeIndex(i => Math.min(EDITOR_SIZES.length - 1, i + 1))} disabled={sizeIndex === EDITOR_SIZES.length - 1}
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => setSize(Math.min(EDITOR_SIZES.length - 1, sizeIndex + 1))} disabled={sizeIndex === EDITOR_SIZES.length - 1}
           style={{ ...btnStyle, opacity: sizeIndex === EDITOR_SIZES.length - 1 ? 0.3 : 1, fontSize: '1rem' }} title="Larger text">A+</button>
       </div>
       <div

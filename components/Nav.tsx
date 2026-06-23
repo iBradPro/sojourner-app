@@ -6,7 +6,7 @@ import SojoShipIcon from '@/components/SojoShipIcon';
 
 function DoorsIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
   return (
-    <svg width={size * 0.7} height={size} viewBox="-1 -1 18 26" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size * 0.875} height={size} viewBox="-1 -1 18 26" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <rect x="1.5" y="1.5" width="13" height="21" rx="2" />
       <path d="M3.5 22 L3.5 6 Q3.5 3.5 5.5 3.5 L10.5 3.5 Q12.5 3.5 12.5 6 L12.5 22 Z" />
       <line x1="8" y1="3.5" x2="8" y2="22" />

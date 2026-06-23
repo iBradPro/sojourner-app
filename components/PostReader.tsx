@@ -19,14 +19,23 @@ function renderContent(content: string) {
 }
 
 export default function PostReader({ content }: { content: string }) {
-  const [sizeIndex, setSizeIndex] = useState(1);
+  const [sizeIndex, setSizeIndex] = useState(() => {
+    if (typeof window === 'undefined') return 1;
+    const saved = localStorage.getItem('textSize');
+    return saved !== null ? Number(saved) : 1;
+  });
+
+  function setSize(i: number) {
+    setSizeIndex(i);
+    localStorage.setItem('textSize', String(i));
+  }
 
   return (
     <div>
       <div className="flex items-center justify-end gap-1 mb-4">
         <span className="text-xs mr-2" style={{ color: '#9999CC' }}>Text size</span>
         <button
-          onClick={() => setSizeIndex((i) => Math.max(0, i - 1))}
+          onClick={() => setSize(Math.max(0, sizeIndex - 1))}
           disabled={sizeIndex === 0}
           className="w-8 h-8 rounded-full text-sm font-bold disabled:opacity-30 transition-colors"
           style={{ background: '#0d0d0d', border: '1px solid #BBAADD', color: '#BBAADD' }}
@@ -35,7 +44,7 @@ export default function PostReader({ content }: { content: string }) {
           A−
         </button>
         <button
-          onClick={() => setSizeIndex((i) => Math.min(SIZES.length - 1, i + 1))}
+          onClick={() => setSize(Math.min(SIZES.length - 1, sizeIndex + 1))}
           disabled={sizeIndex === SIZES.length - 1}
           className="w-8 h-8 rounded-full font-bold disabled:opacity-30 transition-colors"
           style={{ background: '#0d0d0d', border: '1px solid #BBAADD', color: '#BBAADD', fontSize: '1.1rem' }}
