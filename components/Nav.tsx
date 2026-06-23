@@ -1,13 +1,13 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ScrollText, PenLine, Rocket, Users, SlidersHorizontal } from 'lucide-react';
+import { Home, Tablet, PenLine, Rocket, Users, SlidersHorizontal } from 'lucide-react';
 import SojoShipIcon from '@/components/SojoShipIcon';
 
 const links = [
   { href: '/',         label: 'Home',     icon: (c: string) => <Home size={20} strokeWidth={1.5} color={c} /> },
-  { href: '/posts',    label: 'Posts',    icon: (c: string) => <ScrollText size={20} strokeWidth={1.5} color={c} /> },
   { href: '/compose',  label: 'Write',    icon: (c: string) => <PenLine size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/posts',    label: 'Posts',    icon: (c: string) => <Tablet size={20} strokeWidth={1.5} color={c} /> },
   { href: '/tour',     label: 'Tour',     icon: (c: string) => <SojoShipIcon size={20} strokeWidth={1.5} color={c} /> },
   { href: '/missions', label: 'Missions', icon: (c: string) => <Rocket size={20} strokeWidth={1.5} color={c} /> },
   { href: '/crew',     label: 'Crew',     icon: (c: string) => <Users size={20} strokeWidth={1.5} color={c} /> },
