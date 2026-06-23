@@ -33,16 +33,15 @@ export default async function Home() {
 
   return (
     <div className="space-y-8 pb-6">
-      <div className="relative w-full aspect-[6/1]">
+      <div className="relative w-full">
         <Image
           src="/sojourner-hero.jpg"
           alt="USS Sojourner NCC-85748"
-          fill
-          className="object-cover"
+          width={1400}
+          height={307}
+          className="w-full h-auto"
           priority
-          sizes="(max-width: 768px) 100vw, 1024px"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black" />
       </div>
 
       <div className="px-4 space-y-8">
