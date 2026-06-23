@@ -6,7 +6,32 @@ export interface CharacterProfileSection {
 export interface CharacterProfile {
   sections: CharacterProfileSection[];
   imageUrl: string | null;
+  position: string | null;
 }
+
+const DEPARTMENT_ORDER = [
+  'Command', 'Flight Control', 'Operations', 'Engineering',
+  'Medical', 'Counseling', 'Science', 'Tactical & Security',
+  'Intelligence', 'Civilian', 'Other',
+];
+
+export function getDepartment(position: string | null): string {
+  if (!position) return 'Other';
+  const p = position.toLowerCase();
+  if (/captain|commanding officer|executive officer|first officer|\bxo\b|second officer/.test(p)) return 'Command';
+  if (/flight|helm|pilot|navigation|conn/.test(p)) return 'Flight Control';
+  if (/operation|ops officer|logistics/.test(p)) return 'Operations';
+  if (/engineer|propulsion|warp core|chief engineer/.test(p)) return 'Engineering';
+  if (/medical|doctor|physician|nurse|surgeon|medic/.test(p)) return 'Medical';
+  if (/counsel|diplomat|ambassador|liaison/.test(p)) return 'Counseling';
+  if (/science|scientist|researcher|xenobiolog|astrobiolog/.test(p)) return 'Science';
+  if (/tactical|security|guard|investigat|chief of security/.test(p)) return 'Tactical & Security';
+  if (/intel|intelligence/.test(p)) return 'Intelligence';
+  if (/civilian|merchant|journalist|civilian/.test(p)) return 'Civilian';
+  return 'Other';
+}
+
+export { DEPARTMENT_ORDER };
 
 export async function scrapeCharacterProfile(id: number): Promise<CharacterProfile> {
   try {
@@ -19,6 +44,10 @@ export async function scrapeCharacterProfile(id: number): Promise<CharacterProfi
     // Extract first/hero character image
     const imgMatch = html.match(/application\/assets\/images\/characters\/[^"']+/);
     const imageUrl = imgMatch ? `https://sojourner.simcentral.org/${imgMatch[0]}` : null;
+
+    // Extract position from header area (before the tabs)
+    const posMatch = html.match(/<kbd>Position<\/kbd>\s*([\s\S]*?)\s*<\/p>/);
+    const position = posMatch ? posMatch[1].replace(/<[^>]+>/g, '').trim() : null;
 
     const TAB_LABELS: [string, string][] = [
       ['one',   'Basic Info'],
@@ -57,9 +86,9 @@ export async function scrapeCharacterProfile(id: number): Promise<CharacterProfi
       if (fields.length > 0) sections.push({ heading: tabLabel, fields });
     }
 
-    return { sections, imageUrl };
+    return { sections, imageUrl, position };
   } catch {
-    return { sections: [], imageUrl: null };
+    return { sections: [], imageUrl: null, position: null };
   }
 }
 

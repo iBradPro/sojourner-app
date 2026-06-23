@@ -8,7 +8,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const charId = Number(id);
 
-  const [char, { sections: profile, imageUrl }] = await Promise.all([
+  const [char, { sections: profile, imageUrl, position }] = await Promise.all([
     api.character(charId).catch(() => null),
     scrapeCharacterProfile(charId),
   ]);
@@ -34,7 +34,8 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
         )}
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#FFCC99' }}>{name}</h1>
-          {credentials && <p className="text-sm mt-0.5" style={{ color: '#9999CC' }}>{credentials}</p>}
+          {position && <p className="text-sm font-medium mt-0.5" style={{ color: '#BBAADD' }}>{position}</p>}
+          {credentials && <p className="text-xs mt-0.5" style={{ color: '#9999CC' }}>{credentials}</p>}
           <span className="inline-block mt-1 text-xs px-3 py-0.5 rounded-full capitalize font-bold"
             style={{
               background: char.status === 'active' ? '#0a2010' : '#1a1a1a',
