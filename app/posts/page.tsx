@@ -17,7 +17,10 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
       )}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold" style={{ color: '#BBAADD' }}>Posts</h1>
-        <span className="text-xs" style={{ color: '#9999CC' }}>{posts.total} total</span>
+        <div className="flex items-center gap-3">
+          <Link href="/missions" className="text-xs font-bold" style={{ color: '#FF9900' }}>Missions →</Link>
+          <span className="text-xs" style={{ color: '#9999CC' }}>{posts.total} total</span>
+        </div>
       </div>
 
       <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
