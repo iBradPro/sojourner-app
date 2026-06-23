@@ -16,7 +16,7 @@ export default async function CrewPage() {
   );
 
   // Group by department
-  const grouped = new Map<string, { char: typeof crew.data[0]; imageUrl: string | null; position: string | null }[]>();
+  const grouped = new Map<string, { char: typeof allChars[0]; imageUrl: string | null; position: string | null }[]>();
   allChars.forEach((char, i) => {
     const { imageUrl, position } = profiles[i];
     const dept = getDepartment(position);
