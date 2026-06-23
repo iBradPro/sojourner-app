@@ -6,7 +6,7 @@ import SojoShipIcon from '@/components/SojoShipIcon';
 
 function DoorsIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="-1 -1 26 26" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <rect x="1.5" y="1.5" width="21" height="21" rx="2" />
       <path d="M4 22 L4 6 Q4 3.5 6.5 3.5 L17.5 3.5 Q20 3.5 20 6 L20 22 Z" />
       <line x1="12" y1="3.5" x2="12" y2="22" />
@@ -29,7 +29,7 @@ function PaddIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
 
 function WarpCoreIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="-1 -1 26 26" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       {/* Upper column */}
       <line x1="10.5" y1="2"   x2="10.5" y2="8" />
       <line x1="13.5" y1="2"   x2="13.5" y2="8" />
