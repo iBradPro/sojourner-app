@@ -9,7 +9,7 @@ async function apiFetch<T>(path: string, params?: Record<string, string | number
   }
   const res = await fetch(url.toString(), {
     headers: { 'X-API-Key': API_KEY },
-    next: { revalidate: 60 },
+    next: { revalidate: 0 },
   });
   if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
   return res.json();
@@ -84,7 +84,7 @@ export interface Paginated<T> {
 }
 
 export const api = {
-  posts: (params?: { mission?: number; page?: number; per_page?: number; status?: string }) =>
+  posts: (params?: { mission?: number; page?: number; per_page?: number; status?: string; author_id?: number }) =>
     apiFetch<Paginated<Post>>('/posts', params as Record<string, string | number>),
 
   post: (id: number) =>

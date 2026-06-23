@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 interface Props {
   value: string;
@@ -60,8 +60,11 @@ function deserialize(content: string): string {
     .join('');
 }
 
+const EDITOR_SIZES = ['text-sm', 'text-[15px]', 'text-base', 'text-lg', 'text-xl'] as const;
+
 export default function RichTextEditor({ value, onChange, placeholder }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const [sizeIndex, setSizeIndex] = useState(1);
 
   // Set initial content once on mount (form remounts per draft via key).
   useEffect(() => {
@@ -97,20 +100,26 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
   }
 
   const btnStyle = {
-    width: '2.25rem', height: '2rem', borderRadius: '0.5rem',
+    height: '2rem', borderRadius: '0.5rem',
     background: '#1a1000', border: '1px solid #3a2a0a',
     color: '#FF9900', fontSize: '0.875rem', display: 'flex',
     alignItems: 'center', justifyContent: 'center', transition: 'background 0.15s',
-    cursor: 'pointer',
+    cursor: 'pointer', padding: '0 0.6rem',
   } as const;
 
   return (
     <div>
       <style>{`.rte:empty:before{content:attr(data-placeholder);color:#4a3a2a;pointer-events:none;}`}</style>
-      <div className="sticky top-0 z-20 flex gap-1 mb-2 py-2" style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(4px)' }}>
-        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('bold')} style={{ ...btnStyle, fontWeight: 700 }} title="Bold (⌘B)">B</button>
-        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('italic')} style={{ ...btnStyle, fontStyle: 'italic' }} title="Italic (⌘I)">I</button>
-        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('underline')} style={{ ...btnStyle, textDecoration: 'underline' }} title="Underline (⌘U)">U</button>
+      {/* Toolbar: sticky on scroll. overflow:visible on all ancestors required for sticky to work in Safari. */}
+      <div className="sticky top-0 z-20 flex gap-1 mb-2 py-2" style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(4px)' }}>
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('bold')} style={{ ...btnStyle, fontWeight: 700, minWidth: '2.25rem' }} title="Bold (⌘B)">B</button>
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('italic')} style={{ ...btnStyle, fontStyle: 'italic', minWidth: '2.25rem' }} title="Italic (⌘I)">I</button>
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('underline')} style={{ ...btnStyle, textDecoration: 'underline', minWidth: '2.25rem' }} title="Underline (⌘U)">U</button>
+        <div style={{ width: '1px', background: '#3a2a0a', margin: '0 4px' }} />
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => setSizeIndex(i => Math.max(0, i - 1))} disabled={sizeIndex === 0}
+          style={{ ...btnStyle, opacity: sizeIndex === 0 ? 0.3 : 1 }} title="Smaller text">A−</button>
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => setSizeIndex(i => Math.min(EDITOR_SIZES.length - 1, i + 1))} disabled={sizeIndex === EDITOR_SIZES.length - 1}
+          style={{ ...btnStyle, opacity: sizeIndex === EDITOR_SIZES.length - 1 ? 0.3 : 1, fontSize: '1rem' }} title="Larger text">A+</button>
       </div>
       <div
         ref={ref}
@@ -120,7 +129,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         data-placeholder={placeholder}
-        className="rte w-full min-h-[16rem] px-4 py-3 leading-relaxed overflow-y-auto focus:outline-none"
+        className={`rte w-full min-h-[16rem] px-4 py-3 leading-relaxed focus:outline-none ${EDITOR_SIZES[sizeIndex]}`}
         style={{ background: '#0d0d0d', border: '1px solid #3a2a0a', borderRadius: '0 0.75rem 0.75rem 0', color: '#e8e0d0' }}
       />
     </div>
