@@ -15,7 +15,6 @@ export default function WriteSetup() {
     }
     setSaving(true);
     setError('');
-    // Quick validation: try /me with this token
     try {
       const res = await fetch('/api/proxy', {
         method: 'POST',
@@ -39,18 +38,18 @@ export default function WriteSetup() {
   return (
     <div className="px-4 py-6 space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-sky-400">Set Up Write Access</h1>
-        <p className="text-slate-400 text-sm mt-1">
+        <h1 className="text-xl font-bold" style={{ color: '#FF9900' }}>Set Up Write Access</h1>
+        <p className="text-sm mt-1" style={{ color: '#9999CC' }}>
           You need a personal API token to compose and edit posts.
         </p>
       </div>
 
-      <div className="bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-400">
+      <div className="lcars-card px-4 py-3 text-sm" style={{ color: '#BBAADD' }}>
         Your GM will send you a setup link. If you received one, tap it and you'll be set up automatically. Or paste your token below if you have one.
       </div>
 
       {error && (
-        <div className="bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">{error}</div>
+        <div className="rounded-xl px-4 py-3 text-sm" style={{ background: '#200', border: '1px solid #662222', color: '#ff9999' }}>{error}</div>
       )}
 
       <div className="space-y-3">
@@ -59,12 +58,14 @@ export default function WriteSetup() {
           value={token}
           onChange={e => setToken(e.target.value)}
           placeholder="scapi_..."
-          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-sky-600 font-mono text-sm"
+          className="w-full px-4 py-3 font-mono text-sm focus:outline-none"
+          style={{ background: '#0d0d0d', border: '1px solid #3a2a0a', color: '#FFCC99', borderRadius: '0 0.75rem 0.75rem 0' }}
         />
         <button
           onClick={handleSave}
           disabled={saving || !token.trim()}
-          className="w-full py-3 rounded-xl bg-sky-700 text-white font-medium hover:bg-sky-600 transition-colors disabled:opacity-50"
+          className="w-full py-3 rounded-full font-bold text-sm tracking-wide transition-colors disabled:opacity-50"
+          style={{ background: '#FF9900', color: '#000' }}
         >
           {saving ? 'Verifying…' : 'Save Token'}
         </button>

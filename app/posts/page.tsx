@@ -11,22 +11,22 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
   return (
     <div className="px-4 py-6 space-y-4">
       {saved && (
-        <div className="bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded-xl px-4 py-3 text-sm">
+        <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ background: '#0d2010', border: '1px solid #2a6040', color: '#88ddaa' }}>
           Draft saved to the sim.
         </div>
       )}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-sky-400">Posts</h1>
-        <span className="text-xs text-slate-500">{posts.total} total</span>
+        <h1 className="text-2xl font-bold" style={{ color: '#FF9900' }}>Posts</h1>
+        <span className="text-xs" style={{ color: '#9999CC' }}>{posts.total} total</span>
       </div>
 
       <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
         {posts.data.map((post) => (
           <li key={post.id}>
-            <Link href={`/posts/${post.id}`} className="block bg-slate-900 rounded-xl p-4 border border-slate-800 hover:border-sky-700 transition-colors">
-              <p className="font-medium text-slate-100 line-clamp-1">{post.title}</p>
-              {post.summary && <p className="text-slate-400 text-sm mt-1 line-clamp-2">{post.summary}</p>}
-              <p className="text-xs text-slate-600 mt-1">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+            <Link href={`/posts/${post.id}`} className="lcars-card block p-4">
+              <p className="font-medium line-clamp-1" style={{ color: '#FFCC99' }}>{post.title}</p>
+              {post.summary && <p className="text-sm mt-1 line-clamp-2" style={{ color: '#9999CC' }}>{post.summary}</p>}
+              <p className="text-xs mt-1" style={{ color: '#4a4a6a' }}>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
             </Link>
           </li>
         ))}
@@ -35,11 +35,11 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
           {page > 1 ? (
-            <Link href={`/posts?page=${page - 1}`} className="text-sm text-sky-400 hover:text-sky-300">← Newer</Link>
+            <Link href={`/posts?page=${page - 1}`} className="text-sm font-bold" style={{ color: '#FF9900' }}>← Newer</Link>
           ) : <span />}
-          <span className="text-xs text-slate-500">Page {page} of {totalPages}</span>
+          <span className="text-xs" style={{ color: '#9999CC' }}>Page {page} of {totalPages}</span>
           {page < totalPages ? (
-            <Link href={`/posts?page=${page + 1}`} className="text-sm text-sky-400 hover:text-sky-300">Older →</Link>
+            <Link href={`/posts?page=${page + 1}`} className="text-sm font-bold" style={{ color: '#FF9900' }}>Older →</Link>
           ) : <span />}
         </div>
       )}

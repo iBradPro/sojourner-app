@@ -5,6 +5,15 @@ import type { MyCharacter, Mission, Post } from '@/lib/api';
 import { getWriteToken } from '@/lib/token';
 import RichTextEditor from '@/components/RichTextEditor';
 
+const FIELD_INPUT = {
+  background: '#0d0d0d',
+  border: '1px solid #3a2a0a',
+  color: '#FFCC99',
+  borderRadius: '0 0.75rem 0.75rem 0',
+} as const;
+
+const FIELD_FOCUS_CLASS = 'focus:outline-none';
+
 function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
   allCharacters: MyCharacter[];
   selectedIds: number[];
@@ -37,9 +46,10 @@ function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
       {added.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {added.map(c => (
-            <span key={c.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-slate-600 text-slate-100">
+            <span key={c.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium"
+              style={{ background: '#3a1f00', color: '#FFCC99', border: '1px solid #FF9900' }}>
               {c.name}
-              <button type="button" onClick={() => onRemove(c.id)} className="ml-1 text-slate-300 hover:text-white leading-none">×</button>
+              <button type="button" onClick={() => onRemove(c.id)} className="ml-1 leading-none" style={{ color: '#FF9900' }}>×</button>
             </span>
           ))}
         </div>
@@ -51,16 +61,21 @@ function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
           onChange={e => { setSearch(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder="+ Add co-author…"
-          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-600 text-sm"
+          className={`w-full px-4 py-2.5 text-sm ${FIELD_FOCUS_CLASS}`}
+          style={{ ...FIELD_INPUT, borderRadius: '0 0.75rem 0.75rem 0' }}
         />
         {open && filtered.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-xl max-h-48 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-1 rounded-xl overflow-hidden shadow-xl max-h-48 overflow-y-auto"
+            style={{ background: '#0d0d0d', border: '1px solid #3a2a0a' }}>
             {filtered.map(c => (
               <button
                 key={c.id}
                 type="button"
                 onMouseDown={e => { e.preventDefault(); onAdd(c.id); setSearch(''); setOpen(false); }}
-                className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+                className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+                style={{ color: '#FFCC99' }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#1a1000')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
                 {c.name}
               </button>
@@ -156,26 +171,28 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
   return (
     <div className="space-y-5">
       {error && (
-        <div ref={errorRef} className="bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">{error}</div>
+        <div ref={errorRef} className="rounded-xl px-4 py-3 text-sm" style={{ background: '#200', border: '1px solid #662222', color: '#ff9999' }}>{error}</div>
       )}
 
       <div>
-        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 block mb-1">Title</label>
+        <label className="lcars-label mb-2">Title</label>
         <input
           type="text"
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="Post title"
-          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-sky-600"
+          className={`w-full px-4 py-3 ${FIELD_FOCUS_CLASS}`}
+          style={FIELD_INPUT}
         />
       </div>
 
       <div>
-        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 block mb-1">Mission</label>
+        <label className="lcars-label mb-2">Mission</label>
         <select
           value={missionId}
           onChange={e => setMissionId(e.target.value)}
-          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-sky-600"
+          className={`w-full px-4 py-3 ${FIELD_FOCUS_CLASS}`}
+          style={FIELD_INPUT}
         >
           <option value="">No mission</option>
           {missions.map(m => (
@@ -185,18 +202,17 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
       </div>
 
       <div>
-        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 block mb-2">Characters</label>
+        <label className="lcars-label mb-2">Characters</label>
         <div className="flex flex-wrap gap-2 mb-2">
           {myCharacters.map(c => (
             <button
               key={c.id}
               type="button"
               onClick={() => toggleAuthor(c.id)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                selectedAuthors.includes(c.id)
-                  ? 'bg-sky-700 text-sky-100'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-              }`}
+              className="px-3 py-1.5 rounded-full text-sm font-bold transition-colors"
+              style={selectedAuthors.includes(c.id)
+                ? { background: '#FF9900', color: '#000' }
+                : { background: '#1a1000', color: '#9999CC', border: '1px solid #3a2a0a' }}
             >
               {c.name}
             </button>
@@ -213,7 +229,7 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
       </div>
 
       <div>
-        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 block mb-1">Content</label>
+        <label className="lcars-label mb-2">Content</label>
         <RichTextEditor value={body} onChange={setBody} placeholder="Write your post..." />
       </div>
 
@@ -221,14 +237,16 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
         <button
           onClick={() => handleSubmit('saved')}
           disabled={saving}
-          className="flex-1 py-3 rounded-xl bg-slate-700 text-slate-200 font-medium hover:bg-slate-600 transition-colors disabled:opacity-50"
+          className="flex-1 py-3 rounded-full font-bold text-sm tracking-wide transition-colors disabled:opacity-50"
+          style={{ background: '#1a1000', border: '1px solid #9999CC', color: '#9999CC' }}
         >
           {saving ? 'Saving…' : 'Save Draft'}
         </button>
         <button
           onClick={() => handleSubmit('activated')}
           disabled={saving}
-          className="flex-1 py-3 rounded-xl bg-sky-700 text-white font-medium hover:bg-sky-600 transition-colors disabled:opacity-50"
+          className="flex-1 py-3 rounded-full font-bold text-sm tracking-wide transition-colors disabled:opacity-50"
+          style={{ background: '#FF9900', color: '#000' }}
         >
           {saving ? 'Posting…' : 'Post'}
         </button>

@@ -85,22 +85,23 @@ export default function GMTools() {
 
   return (
     <section className="space-y-3">
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-amber-600">GM Tools</h2>
-      <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-4 space-y-4">
-        <p className="text-slate-400 text-sm">Generate a write-access setup link for a writer. Sends them directly into the app with their token saved.</p>
+      <h2 className="lcars-label" style={{ '--lcars-orange': '#FF9966' } as React.CSSProperties}>GM Tools</h2>
+      <div className="lcars-card px-4 py-4 space-y-4" style={{ borderLeftColor: '#FF9966' }}>
+        <p className="text-sm" style={{ color: '#9999CC' }}>Generate a write-access setup link for a writer. Sends them directly into the app with their token saved.</p>
 
         {error && (
-          <div className="bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-3 py-2 text-sm">{error}</div>
+          <div className="rounded-xl px-3 py-2 text-sm" style={{ background: '#200', border: '1px solid #662222', color: '#ff9999' }}>{error}</div>
         )}
 
         {!magicLink ? (
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 block mb-1">Writer</label>
+              <label className="text-xs font-bold uppercase tracking-widest block mb-1" style={{ color: '#FF9966' }}>Writer</label>
               <select
                 value={selectedUserId}
                 onChange={e => setSelectedUserId(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-600"
+                className="w-full px-4 py-3 focus:outline-none"
+                style={{ background: '#0d0d0d', border: '1px solid #3a2a0a', color: '#FFCC99', borderRadius: '0 0.75rem 0.75rem 0' }}
               >
                 <option value="">Select a writer…</option>
                 {WRITERS.map(w => (
@@ -111,29 +112,32 @@ export default function GMTools() {
             <button
               onClick={handleCreate}
               disabled={creating || !selectedUserId}
-              className="w-full py-3 rounded-xl bg-amber-700 text-white font-medium hover:bg-amber-600 transition-colors disabled:opacity-50"
+              className="w-full py-3 rounded-full font-bold text-sm tracking-wide transition-colors disabled:opacity-50"
+              style={{ background: '#FF9966', color: '#000' }}
             >
               {creating ? 'Creating token…' : 'Generate Setup Link'}
             </button>
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-slate-300 text-sm font-medium">
+            <p className="text-sm font-medium" style={{ color: '#FFCC99' }}>
               Setup link for {WRITERS.find(w => String(w.id) === selectedUserId)?.name}
             </p>
-            <p className="text-slate-400 text-xs font-mono break-all">{magicLink}</p>
+            <p className="text-xs font-mono break-all" style={{ color: '#9999CC' }}>{magicLink}</p>
             <div className="flex gap-2">
-              <button onClick={copy} className="flex-1 py-2.5 rounded-xl bg-sky-700 text-white text-sm font-medium hover:bg-sky-600 transition-colors">
+              <button onClick={copy} className="flex-1 py-2.5 rounded-full font-bold text-sm tracking-wide transition-colors"
+                style={{ background: '#FF9900', color: '#000' }}>
                 {copied ? 'Copied!' : 'Copy Link'}
               </button>
               <button
                 onClick={() => { setMagicLink(''); setSelectedUserId(''); setError(''); }}
-                className="px-4 py-2.5 rounded-xl bg-slate-700 text-slate-300 text-sm hover:bg-slate-600 transition-colors"
+                className="px-4 py-2.5 rounded-full text-sm font-bold transition-colors"
+                style={{ background: '#1a1000', border: '1px solid #9999CC', color: '#9999CC' }}
               >
                 New
               </button>
             </div>
-            <p className="text-slate-500 text-xs">Send this to the writer. When they tap it, they're set up automatically.</p>
+            <p className="text-xs" style={{ color: '#4a4a6a' }}>Send this to the writer. When they tap it, they're set up automatically.</p>
           </div>
         )}
       </div>

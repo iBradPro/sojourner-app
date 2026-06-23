@@ -96,15 +96,21 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
     document.execCommand('insertText', false, text);
   }
 
-  const btn = 'w-9 h-8 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors text-sm flex items-center justify-center';
+  const btnStyle = {
+    width: '2.25rem', height: '2rem', borderRadius: '0.5rem',
+    background: '#1a1000', border: '1px solid #3a2a0a',
+    color: '#FF9900', fontSize: '0.875rem', display: 'flex',
+    alignItems: 'center', justifyContent: 'center', transition: 'background 0.15s',
+    cursor: 'pointer',
+  } as const;
 
   return (
     <div>
-      <style>{`.rte:empty:before{content:attr(data-placeholder);color:rgb(71 85 105);pointer-events:none;}`}</style>
-      <div className="sticky top-0 z-20 flex gap-1 mb-2 py-2 bg-slate-950/90 backdrop-blur-sm">
-        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('bold')} className={`${btn} font-bold`} title="Bold (⌘B)">B</button>
-        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('italic')} className={`${btn} italic`} title="Italic (⌘I)">I</button>
-        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('underline')} className={`${btn} underline`} title="Underline (⌘U)">U</button>
+      <style>{`.rte:empty:before{content:attr(data-placeholder);color:#4a3a2a;pointer-events:none;}`}</style>
+      <div className="sticky top-0 z-20 flex gap-1 mb-2 py-2" style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(4px)' }}>
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('bold')} style={{ ...btnStyle, fontWeight: 700 }} title="Bold (⌘B)">B</button>
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('italic')} style={{ ...btnStyle, fontStyle: 'italic' }} title="Italic (⌘I)">I</button>
+        <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('underline')} style={{ ...btnStyle, textDecoration: 'underline' }} title="Underline (⌘U)">U</button>
       </div>
       <div
         ref={ref}
@@ -114,7 +120,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         data-placeholder={placeholder}
-        className="rte w-full min-h-[16rem] bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-sky-600 leading-relaxed overflow-y-auto"
+        className="rte w-full min-h-[16rem] px-4 py-3 leading-relaxed overflow-y-auto focus:outline-none"
+        style={{ background: '#0d0d0d', border: '1px solid #3a2a0a', borderRadius: '0 0.75rem 0.75rem 0', color: '#e8e0d0' }}
       />
     </div>
   );

@@ -4,10 +4,77 @@
   --font-sans: var(--font-geist-sans);
 }
 
-/* Post content HTML rendering */
+/* ── LCARS color tokens ─────────────────────────────── */
+@layer base {
+  :root {
+    --lcars-orange:   #FF9900;
+    --lcars-peach:    #FFCC99;
+    --lcars-amber:    #FF7700;
+    --lcars-purple:   #9999CC;
+    --lcars-lavender: #BBAADD;
+    --lcars-salmon:   #CC6666;
+    --lcars-tan:      #FF9966;
+    --lcars-bg:       #000000;
+    --lcars-panel:    #0d0d0d;
+    --lcars-border:   #2a1f0a;
+  }
+}
+
+/* ── LCARS section header ───────────────────────────── */
+@layer components {
+  .lcars-label {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--lcars-orange);
+  }
+  .lcars-label::before {
+    content: '';
+    display: inline-block;
+    width: 0.75rem;
+    height: 1.1rem;
+    background: var(--lcars-orange);
+    border-radius: 999px 0 0 999px;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+  .lcars-label::after {
+    content: '';
+    display: block;
+    flex: 1;
+    height: 2px;
+    background: var(--lcars-orange);
+    margin-left: 0.5rem;
+    opacity: 0.35;
+  }
+
+  /* ── LCARS card ─────────────────────────────────────── */
+  .lcars-card {
+    background: var(--lcars-panel);
+    border: 1px solid var(--lcars-border);
+    border-left: 3px solid var(--lcars-orange);
+    border-radius: 0 0.75rem 0.75rem 0;
+    transition: border-left-color 0.15s;
+  }
+  .lcars-card:hover {
+    border-left-color: var(--lcars-peach);
+  }
+}
+
+/* ── Post content HTML rendering ───────────────────── */
 .post-content p { margin-bottom: 1rem; }
-.post-content i, .post-content em { font-style: italic; color: #94a3b8; }
-.post-content b, .post-content strong { font-weight: 600; }
-.post-content hr { border-color: #334155; margin: 1.5rem 0; }
-.post-content h1, .post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6 { font-weight: 600; margin-bottom: 0.5rem; margin-top: 1rem; color: #cbd5e1; }
-.post-content a { color: #38bdf8; text-decoration: underline; }
+.post-content i, .post-content em { font-style: italic; color: var(--lcars-lavender); }
+.post-content b, .post-content strong { font-weight: 600; color: var(--lcars-peach); }
+.post-content hr { border-color: #2a2a2a; margin: 1.5rem 0; }
+.post-content h1, .post-content h2, .post-content h3,
+.post-content h4, .post-content h5, .post-content h6 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+  color: var(--lcars-peach);
+}
+.post-content a { color: var(--lcars-orange); text-decoration: underline; }

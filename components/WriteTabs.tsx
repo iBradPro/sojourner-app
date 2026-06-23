@@ -111,7 +111,7 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
 
   if (hasToken === null || loading) {
     return (
-      <div className="px-4 py-12 text-center text-slate-500 text-sm">Loading…</div>
+      <div className="px-4 py-12 text-center text-sm" style={{ color: '#9999CC' }}>Loading…</div>
     );
   }
 
@@ -120,32 +120,33 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
   return (
     <div className="px-4 py-6">
       {savedBanner && (
-        <div className="bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded-xl px-4 py-3 text-sm mb-4">
+        <div className="rounded-xl px-4 py-3 text-sm font-medium mb-4" style={{ background: '#0d2010', border: '1px solid #2a6040', color: '#88ddaa' }}>
           Draft saved.
         </div>
       )}
 
       <div className="flex items-center gap-2 mb-6">
-        <div className="flex flex-1 rounded-xl bg-slate-800 p-1">
+        <div className="flex flex-1 rounded-full p-1 gap-1" style={{ background: '#0d0d0d', border: '1px solid #2a1f0a' }}>
           <button
             onClick={startNew}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-              tab === 'new' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-300'
-            }`}
+            className="flex-1 py-2 rounded-full text-sm font-bold tracking-wide transition-colors"
+            style={tab === 'new'
+              ? { background: '#FF9900', color: '#000' }
+              : { color: '#9999CC' }}
           >
             {activeDraft ? 'Edit Draft' : 'New Post'}
           </button>
           <button
             onClick={() => setTab('drafts')}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-              tab === 'drafts' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-slate-300'
-            }`}
+            className="flex-1 py-2 rounded-full text-sm font-bold tracking-wide transition-colors"
+            style={tab === 'drafts'
+              ? { background: '#FF9900', color: '#000' }
+              : { color: '#9999CC' }}
           >
-            Drafts {myDrafts.length > 0 && <span className="ml-1 text-xs text-slate-400">({myDrafts.length})</span>}
+            Drafts {myDrafts.length > 0 && <span className="ml-1 text-xs opacity-70">({myDrafts.length})</span>}
           </button>
         </div>
       </div>
-
 
       {tab === 'new' && (
         <ComposeForm
@@ -163,28 +164,39 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
             <div className="flex justify-end mb-1">
               <button
                 onClick={() => setGmView(v => !v)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                  gmView ? 'bg-amber-700 text-amber-100' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                }`}
+                className="px-3 py-1.5 rounded-full text-xs font-bold transition-colors"
+                style={gmView
+                  ? { background: '#FF9900', color: '#000' }
+                  : { background: '#0d0d0d', color: '#9999CC', border: '1px solid #2a1f0a' }}
               >
                 {gmView ? 'GM View ★' : 'GM View'}
               </button>
             </div>
           )}
           {visibleDrafts.length === 0 ? (
-            <p className="text-slate-500 text-sm text-center py-8">No saved drafts.</p>
+            <p className="text-sm text-center py-8" style={{ color: '#9999CC' }}>No saved drafts.</p>
           ) : (
             visibleDrafts.map(draft => (
               <button
                 key={draft.id}
                 onClick={() => openDraft(draft)}
-                className="w-full text-left bg-slate-800 hover:bg-slate-700 rounded-xl px-4 py-4 transition-colors"
+                className="w-full text-left lcars-card px-4 py-4 transition-colors"
               >
-                <p className="text-slate-100 font-medium">{draft.title || 'Untitled'}</p>
-                {gmView && draft.authors && (
-                  <p className="text-slate-500 text-xs mt-0.5">{draft.authors}</p>
+                <p className="font-medium" style={{ color: '#FFCC99' }}>{draft.title || 'Untitled'}</p>
+                {draft.authors && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {draft.authors.split(',').map(a => a.trim()).filter(Boolean).map(author => (
+                      <span
+                        key={author}
+                        className="text-xs font-medium px-2 py-0.5 rounded-full"
+                        style={{ background: '#3a1f00', color: '#FFCC99', border: '1px solid #FF9900' }}
+                      >
+                        {author}
+                      </span>
+                    ))}
+                  </div>
                 )}
-                <p className="text-slate-500 text-xs mt-1">{new Date(draft.date).toLocaleDateString()}</p>
+                <p className="text-xs mt-1.5" style={{ color: '#4a4a6a' }}>{new Date(draft.date).toLocaleDateString()}</p>
               </button>
             ))
           )}

@@ -15,19 +15,21 @@ const links = [
 export default function Nav() {
   const path = usePathname();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 z-50">
-      <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex">
+    <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ background: '#000', borderTop: '2px solid #FF9900' }}>
+      <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex gap-0.5 px-1 py-1.5">
         {links.map(({ href, label, icon }) => {
           const active = href === '/' ? path === '/' : path.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-xs transition-colors ${
-                active ? 'text-sky-400' : 'text-slate-500 hover:text-slate-300'
-              }`}
+              className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full text-xs font-bold tracking-wide transition-colors"
+              style={active
+                ? { background: '#FF9900', color: '#000' }
+                : { background: 'transparent', color: '#9999CC' }
+              }
             >
-              <span className="text-xl leading-none">{icon}</span>
+              <span className="text-base leading-none">{icon}</span>
               {label}
             </Link>
           );
