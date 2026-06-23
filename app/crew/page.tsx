@@ -4,16 +4,20 @@ import CharacterImageViewer from '@/components/CharacterImageViewer';
 import Link from 'next/link';
 
 export default async function CrewPage() {
-  const crew = await api.characters({ status: 'active', per_page: 100 });
+  const [active, npcs] = await Promise.all([
+    api.characters({ status: 'active', per_page: 100 }),
+    api.characters({ status: 'npc', per_page: 100 }),
+  ]);
+  const allChars = [...active.data, ...npcs.data];
 
   // Fetch image + position for all crew in parallel (cached 1hr)
   const profiles = await Promise.all(
-    crew.data.map(c => scrapeCharacterProfile(c.id).catch(() => ({ imageUrl: null, position: null, sections: [] })))
+    allChars.map(c => scrapeCharacterProfile(c.id).catch(() => ({ imageUrl: null, position: null, sections: [] })))
   );
 
   // Group by department
   const grouped = new Map<string, { char: typeof crew.data[0]; imageUrl: string | null; position: string | null }[]>();
-  crew.data.forEach((char, i) => {
+  allChars.forEach((char, i) => {
     const { imageUrl, position } = profiles[i];
     const dept = getDepartment(position);
     if (!grouped.has(dept)) grouped.set(dept, []);
@@ -27,7 +31,7 @@ export default async function CrewPage() {
     <div className="px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold" style={{ color: '#BBAADD' }}>Crew</h1>
-        <span className="text-xs" style={{ color: '#9999CC' }}>{crew.total} active</span>
+        <span className="text-xs" style={{ color: '#9999CC' }}>{allChars.length} crew</span>
       </div>
 
       {departments.map(dept => (
