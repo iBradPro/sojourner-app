@@ -4,11 +4,18 @@ import CharacterImageViewer from '@/components/CharacterImageViewer';
 import Link from 'next/link';
 
 export default async function CrewPage() {
-  const [active, npcs] = await Promise.all([
+  const [active, npcs, manifestHtml] = await Promise.all([
     api.characters({ status: 'active', per_page: 100 }),
     api.characters({ status: 'npc', per_page: 100 }),
+    fetch('https://sojourner.simcentral.org/personnel/index', { next: { revalidate: 3600 } }).then(r => r.text()),
   ]);
-  const allChars = [...active.data, ...npcs.data];
+
+  // Use the manifest as the source of truth for who's actually on the crew
+  const manifestIds = new Set(
+    [...manifestHtml.matchAll(/personnel\/character\/(\d+)/g)].map(m => Number(m[1]))
+  );
+
+  const allChars = [...active.data, ...npcs.data].filter(c => manifestIds.has(c.id));
 
   // Fetch image + position for all crew in parallel (cached 1hr)
   const profiles = await Promise.all(
@@ -19,8 +26,6 @@ export default async function CrewPage() {
   const grouped = new Map<string, { char: typeof allChars[0]; imageUrl: string | null; position: string | null }[]>();
   allChars.forEach((char, i) => {
     const { imageUrl, position } = profiles[i];
-    // Asterisk on position = retired/former NPC — skip
-    if (position?.trim().endsWith('*')) return;
     const dept = getDepartment(position);
     if (!grouped.has(dept)) grouped.set(dept, []);
     grouped.get(dept)!.push({ char, imageUrl, position });
