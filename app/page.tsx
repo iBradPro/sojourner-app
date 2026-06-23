@@ -35,7 +35,7 @@ export default async function Home() {
     <div className="space-y-8 pb-6">
       <div className="relative w-full aspect-[3/1]">
         <Image
-          src="https://sojourner.simcentral.org/application/views/lcars/main/images/head-img.png"
+          src="/sojourner-hero.jpg"
           alt="USS Sojourner NCC-85748"
           fill
           className="object-cover"
