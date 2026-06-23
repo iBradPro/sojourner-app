@@ -1,16 +1,17 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ScrollText, PenLine, Ship, Rocket, Users, SlidersHorizontal, type LucideIcon } from 'lucide-react';
+import { Home, ScrollText, PenLine, Rocket, Users, SlidersHorizontal } from 'lucide-react';
+import SojoShipIcon from '@/components/SojoShipIcon';
 
-const links: { href: string; label: string; Icon: LucideIcon }[] = [
-  { href: '/',          label: 'Home',     Icon: Home },
-  { href: '/posts',     label: 'Posts',    Icon: ScrollText },
-  { href: '/compose',   label: 'Write',    Icon: PenLine },
-  { href: '/tour',      label: 'Tour',     Icon: Ship },
-  { href: '/missions',  label: 'Missions', Icon: Rocket },
-  { href: '/crew',      label: 'Crew',     Icon: Users },
-  { href: '/settings',  label: 'Settings', Icon: SlidersHorizontal },
+const links = [
+  { href: '/',         label: 'Home',     icon: (c: string) => <Home size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/posts',    label: 'Posts',    icon: (c: string) => <ScrollText size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/compose',  label: 'Write',    icon: (c: string) => <PenLine size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/tour',     label: 'Tour',     icon: (c: string) => <SojoShipIcon size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/missions', label: 'Missions', icon: (c: string) => <Rocket size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/crew',     label: 'Crew',     icon: (c: string) => <Users size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/settings', label: 'Settings', icon: (c: string) => <SlidersHorizontal size={20} strokeWidth={1.5} color={c} /> },
 ];
 
 export default function Nav() {
@@ -18,19 +19,17 @@ export default function Nav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ background: '#000', borderTop: '2px solid #9999CC' }}>
       <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex gap-0.5 px-1 py-1.5">
-        {links.map(({ href, label, Icon }) => {
+        {links.map(({ href, label, icon }) => {
           const active = href === '/' ? path === '/' : path.startsWith(href);
+          const color = active ? '#000' : '#9999CC';
           return (
             <Link
               key={href}
               href={href}
               className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full text-xs font-bold tracking-wide transition-colors"
-              style={active
-                ? { background: '#BBAADD', color: '#000' }
-                : { background: 'transparent', color: '#9999CC' }
-              }
+              style={active ? { background: '#BBAADD', color: '#000' } : { color: '#9999CC' }}
             >
-              <Icon size={20} strokeWidth={1.5} color="currentColor" />
+              {icon(color)}
               {label}
             </Link>
           );
