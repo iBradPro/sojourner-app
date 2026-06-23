@@ -24,7 +24,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold shrink-0"
-          style={{ background: '#1a0f00', color: '#FF9900', border: '2px solid #FF9900' }}>
+          style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
           {name[0]}
         </div>
         <div>

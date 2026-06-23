@@ -211,7 +211,7 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
               onClick={() => toggleAuthor(c.id)}
               className="px-3 py-1.5 rounded-full text-sm font-bold transition-colors"
               style={selectedAuthors.includes(c.id)
-                ? { background: '#FF9900', color: '#000' }
+                ? { background: '#BBAADD', color: '#000' }
                 : { background: '#0d0a1a', color: '#9999CC', border: '1px solid #3a3560' }}
             >
               {c.name}

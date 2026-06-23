@@ -16,7 +16,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
         </div>
       )}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold" style={{ color: '#FF9900' }}>Posts</h1>
+        <h1 className="text-2xl font-bold" style={{ color: '#BBAADD' }}>Posts</h1>
         <span className="text-xs" style={{ color: '#9999CC' }}>{posts.total} total</span>
       </div>
 
@@ -35,11 +35,11 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
           {page > 1 ? (
-            <Link href={`/posts?page=${page - 1}`} className="text-sm font-bold" style={{ color: '#FF9900' }}>← Newer</Link>
+            <Link href={`/posts?page=${page - 1}`} className="text-sm font-bold" style={{ color: '#BBAADD' }}>← Newer</Link>
           ) : <span />}
           <span className="text-xs" style={{ color: '#9999CC' }}>Page {page} of {totalPages}</span>
           {page < totalPages ? (
-            <Link href={`/posts?page=${page + 1}`} className="text-sm font-bold" style={{ color: '#FF9900' }}>Older →</Link>
+            <Link href={`/posts?page=${page + 1}`} className="text-sm font-bold" style={{ color: '#BBAADD' }}>Older →</Link>
           ) : <span />}
         </div>
       )}

@@ -19,13 +19,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           {new Date(post.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
         </p>
         {post.mission_id && (
-          <Link href={`/missions/${post.mission_id}`} className="inline-block mt-1 text-xs font-bold" style={{ color: '#FF9900' }}>
+          <Link href={`/missions/${post.mission_id}`} className="inline-block mt-1 text-xs font-bold" style={{ color: '#BBAADD' }}>
             View mission →
           </Link>
         )}
         {post.summary && (
           <div className="mt-4 p-3 rounded-lg" style={{ background: '#0d0d0d', border: '1px solid #2a1f0a' }}>
-            <p className="text-xs uppercase tracking-wider mb-1" style={{ color: '#FF9900' }}>Summary</p>
+            <p className="text-xs uppercase tracking-wider mb-1" style={{ color: '#BBAADD' }}>Summary</p>
             <p className="text-sm" style={{ color: '#BBAADD' }}>{post.summary}</p>
           </div>
         )}

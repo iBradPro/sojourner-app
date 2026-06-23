@@ -38,7 +38,7 @@ export default function WriteSetup() {
   return (
     <div className="px-4 py-6 space-y-6">
       <div>
-        <h1 className="text-xl font-bold" style={{ color: '#FF9900' }}>Set Up Write Access</h1>
+        <h1 className="text-xl font-bold" style={{ color: '#BBAADD' }}>Set Up Write Access</h1>
         <p className="text-sm mt-1" style={{ color: '#9999CC' }}>
           You need a personal API token to compose and edit posts.
         </p>

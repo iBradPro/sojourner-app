@@ -30,14 +30,14 @@
     font-weight: 700;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--lcars-orange);
+    color: var(--lcars-lavender);
   }
   .lcars-label::before {
     content: '';
     display: inline-block;
     width: 0.75rem;
     height: 1.1rem;
-    background: var(--lcars-orange);
+    background: var(--lcars-lavender);
     border-radius: 999px 0 0 999px;
     margin-right: 0.5rem;
     flex-shrink: 0;
@@ -47,7 +47,7 @@
     display: block;
     flex: 1;
     height: 2px;
-    background: var(--lcars-orange);
+    background: var(--lcars-lavender);
     margin-left: 0.5rem;
     opacity: 0.35;
   }
@@ -56,12 +56,12 @@
   .lcars-card {
     background: var(--lcars-panel);
     border: 1px solid #1e1e2e;
-    border-left: 3px solid var(--lcars-purple);
+    border-left: 3px solid var(--lcars-lavender);
     border-radius: 0 0.75rem 0.75rem 0;
     transition: border-left-color 0.15s;
   }
   .lcars-card:hover {
-    border-left-color: var(--lcars-orange);
+    border-left-color: var(--lcars-purple);
   }
   .lcars-card-orange {
     border-left-color: var(--lcars-orange);
@@ -80,4 +80,4 @@
   margin-top: 1rem;
   color: var(--lcars-peach);
 }
-.post-content a { color: var(--lcars-orange); text-decoration: underline; }
+.post-content a { color: var(--lcars-lavender); text-decoration: underline; }

@@ -7,7 +7,7 @@ export default async function CrewPage() {
   return (
     <div className="px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold" style={{ color: '#FF9900' }}>Crew</h1>
+        <h1 className="text-2xl font-bold" style={{ color: '#BBAADD' }}>Crew</h1>
         <span className="text-xs" style={{ color: '#9999CC' }}>{crew.total} active</span>
       </div>
 
@@ -16,7 +16,7 @@ export default async function CrewPage() {
           <li key={char.id}>
             <Link href={`/crew/${char.id}`} className="lcars-card flex items-center gap-3 p-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
-                style={{ background: '#1a0f00', color: '#FF9900', border: '2px solid #FF9900' }}>
+                style={{ background: '#110820', color: '#BBAADD', border: '2px solid #BBAADD' }}>
                 {(char.preferred_name ?? char.first_name ?? '?')[0]}
               </div>
               <div className="min-w-0">

@@ -19,7 +19,7 @@ export default function SettingsPage() {
 
   return (
     <div className="px-4 py-6 space-y-8">
-      <h1 className="text-xl font-bold" style={{ color: '#FF9900' }}>Settings</h1>
+      <h1 className="text-xl font-bold" style={{ color: '#BBAADD' }}>Settings</h1>
 
       <section className="space-y-3">
         <h2 className="lcars-label">Write Access</h2>
@@ -27,7 +27,7 @@ export default function SettingsPage() {
           {tokenCleared ? (
             <p className="text-sm" style={{ color: '#9999CC' }}>
               Token removed.{' '}
-              <a href="/compose" style={{ color: '#FF9900', textDecoration: 'underline' }}>Set up write access</a>
+              <a href="/compose" style={{ color: '#BBAADD', textDecoration: 'underline' }}>Set up write access</a>
             </p>
           ) : hasToken ? (
             <>
@@ -39,7 +39,7 @@ export default function SettingsPage() {
           ) : (
             <p className="text-sm" style={{ color: '#9999CC' }}>
               No token set.{' '}
-              <a href="/compose" style={{ color: '#FF9900', textDecoration: 'underline' }}>Set up write access</a>
+              <a href="/compose" style={{ color: '#BBAADD', textDecoration: 'underline' }}>Set up write access</a>
             </p>
           )}
         </div>

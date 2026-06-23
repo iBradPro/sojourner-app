@@ -15,7 +15,7 @@ export default function PostReader({ content }: { content: string }) {
           onClick={() => setSizeIndex((i) => Math.max(0, i - 1))}
           disabled={sizeIndex === 0}
           className="w-8 h-8 rounded-full text-sm font-bold disabled:opacity-30 transition-colors"
-          style={{ background: '#0d0d0d', border: '1px solid #FF9900', color: '#FF9900' }}
+          style={{ background: '#0d0d0d', border: '1px solid #BBAADD', color: '#BBAADD' }}
           aria-label="Decrease text size"
         >
           A−
@@ -24,7 +24,7 @@ export default function PostReader({ content }: { content: string }) {
           onClick={() => setSizeIndex((i) => Math.min(SIZES.length - 1, i + 1))}
           disabled={sizeIndex === SIZES.length - 1}
           className="w-8 h-8 rounded-full font-bold disabled:opacity-30 transition-colors"
-          style={{ background: '#0d0d0d', border: '1px solid #FF9900', color: '#FF9900', fontSize: '1.1rem' }}
+          style={{ background: '#0d0d0d', border: '1px solid #BBAADD', color: '#BBAADD', fontSize: '1.1rem' }}
           aria-label="Increase text size"
         >
           A+

@@ -102,7 +102,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
   const btnStyle = {
     height: '2rem', borderRadius: '0.5rem',
     background: '#1a1000', border: '1px solid #3a2a0a',
-    color: '#FF9900', fontSize: '0.875rem', display: 'flex',
+    color: '#BBAADD', fontSize: '0.875rem', display: 'flex',
     alignItems: 'center', justifyContent: 'center', transition: 'background 0.15s',
     cursor: 'pointer', padding: '0 0.6rem',
   } as const;

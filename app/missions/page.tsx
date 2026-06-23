@@ -13,7 +13,7 @@ export default async function MissionsPage() {
 
   return (
     <div className="px-4 py-6 space-y-8">
-      <h1 className="text-2xl font-bold" style={{ color: '#FF9900' }}>Missions</h1>
+      <h1 className="text-2xl font-bold" style={{ color: '#BBAADD' }}>Missions</h1>
 
       {(['current', 'upcoming', 'completed'] as const).map((status) => {
         const list = grouped[status];

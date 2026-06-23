@@ -49,9 +49,9 @@ export default function WelcomeModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
       <div className="w-full max-w-2xl rounded-t-2xl px-5 pt-5 pb-24 space-y-4"
-        style={{ background: '#0d0d0d', borderTop: '3px solid #FF9900' }}>
+        style={{ background: '#0d0d0d', borderTop: '3px solid #BBAADD' }}>
         <div>
-          <h2 className="text-xl font-bold" style={{ color: '#FF9900' }}>Welcome to the USS Sojourner app!</h2>
+          <h2 className="text-xl font-bold" style={{ color: '#BBAADD' }}>Welcome to the USS Sojourner app!</h2>
           <p className="text-sm mt-2" style={{ color: '#BBAADD' }}>
             To read posts, missions, and explore the ship, no setup is needed.
             To write and edit posts, you'll need a personal API token.{' '}
@@ -59,7 +59,7 @@ export default function WelcomeModal() {
               href="https://discord.com/users/301501040879075328"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: '#FF9900', textDecoration: 'underline' }}
+              style={{ color: '#BBAADD', textDecoration: 'underline' }}
             >
               Contact your GM
             </a>{' '}
@@ -78,7 +78,7 @@ export default function WelcomeModal() {
             onChange={e => setToken(e.target.value)}
             placeholder="Paste your API token (scapi_...)"
             className="w-full rounded-xl px-4 py-2.5 font-mono text-sm focus:outline-none"
-            style={{ background: '#1a1a1a', border: '1px solid #FF9900', color: '#FFCC99' }}
+            style={{ background: '#1a1a1a', border: '1px solid #BBAADD', color: '#FFCC99' }}
           />
           <div className="flex gap-2">
             <button

@@ -15,7 +15,7 @@ const links = [
 export default function Nav() {
   const path = usePathname();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ background: '#000', borderTop: '2px solid #FF9900' }}>
+    <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ background: '#000', borderTop: '2px solid #BBAADD' }}>
       <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex gap-0.5 px-1 py-1.5">
         {links.map(({ href, label, icon }) => {
           const active = href === '/' ? path === '/' : path.startsWith(href);
@@ -25,7 +25,7 @@ export default function Nav() {
               href={href}
               className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full text-xs font-bold tracking-wide transition-colors"
               style={active
-                ? { background: '#FF9900', color: '#000' }
+                ? { background: '#BBAADD', color: '#000' }
                 : { background: 'transparent', color: '#9999CC' }
               }
             >

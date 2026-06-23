@@ -138,7 +138,7 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
             onClick={startNew}
             className="flex-1 py-2 rounded-full text-sm font-bold tracking-wide transition-colors"
             style={tab === 'new'
-              ? { background: '#FF9900', color: '#000' }
+              ? { background: '#BBAADD', color: '#000' }
               : { color: '#9999CC' }}
           >
             {activeDraft ? 'Edit Draft' : 'New Post'}
@@ -173,7 +173,7 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
                 onClick={() => setGmView(v => !v)}
                 className="px-3 py-1.5 rounded-full text-xs font-bold transition-colors"
                 style={gmView
-                  ? { background: '#FF9900', color: '#000' }
+                  ? { background: '#BBAADD', color: '#000' }
                   : { background: '#0d0d0d', color: '#9999CC', border: '1px solid #2a1f0a' }}
               >
                 {gmView ? 'GM View ★' : 'GM View'}
