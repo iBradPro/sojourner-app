@@ -45,12 +45,30 @@ export default async function Home() {
       </div>
 
       <div className="px-4 space-y-8">
-        <section>
+        <section className="space-y-5">
           <h1 className="text-2xl font-bold tracking-wide" style={{ color: '#FF9900' }}>USS Sojourner</h1>
-          <p className="text-xs font-mono tracking-widest mt-0.5 mb-3" style={{ color: '#FFCC99' }}>NCC-85748</p>
-          <p className="text-sm leading-relaxed" style={{ color: '#BBAADD' }}>
-            Set in the 25th century in the Delta Quadrant, the Sojourner is deployed as part of the Pathfinder II Project — establishing diplomatic ties with species near the Barzan wormhole, months between refuel and resupply.
-          </p>
+          <p className="text-xs font-mono tracking-widest -mt-3" style={{ color: '#FFCC99' }}>NCC-85748</p>
+
+          <div>
+            <h2 className="text-base font-bold mb-1" style={{ color: '#FFCC99' }}>In the 25th century…</h2>
+            <p className="text-sm leading-relaxed" style={{ color: '#BBAADD' }}>
+              It is 2400, and the United Federation of Planets finds itself in an uneasy, weary peacetime. The Dominion has been silent for decades. The Romulan Star Empire is a fractured shadow of itself. The Klingon Empire has seemingly turned inward. And the Borg Collective, according to credible intelligence, has been destroyed — their shattered transwarp conduits littering space like precarious relics. But for all of this apparent peace, Starfleet feels like an institution in seasoned middle age: its newest captains trained to be cautious rather than bold, exploration kept closer to home, and the age of legendary mavericks quietly fading. Does anyone remember when we used to be explorers?
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-base font-bold mb-1" style={{ color: '#FFCC99' }}>A New Frontier</h2>
+            <p className="text-sm leading-relaxed" style={{ color: '#BBAADD' }}>
+              A breakthrough changed the calculus. The Barzan Wormhole — long confirmed to be unstable — was stabilized for the first time through an unprecedented multi-power effort known as the Barzan Compact, bringing together the Federation, the Barzans, and even the Tholians. For the first time in a generation, the Delta Quadrant became reliably accessible. But Starfleet's return has been cautious: several vessels lost, hostile species more advanced than expected, and a new power vacuum left by the apparent collapse of the Borg. The Compact needs reliable diplomatic footholds to survive — and so Pathfinder Station was built.
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-base font-bold mb-1" style={{ color: '#FFCC99' }}>The Starship Sojourner</h2>
+            <p className="text-sm leading-relaxed" style={{ color: '#BBAADD' }}>
+              Unwilling to commit major resources, Starfleet turned to smaller, time-tested vessels capable of operating autonomously for months between resupply. The Rhode Island-class was refitted for the task, and the first of these new ships deployed to the Delta Quadrant is the USS Sojourner — a long-range science survey vessel, a crew of eighty, and a mandate to explore the unknown on the far side of the galaxy. This is their story.
+            </p>
+          </div>
         </section>
 
         {currentMission && (
