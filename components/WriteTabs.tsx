@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ComposeForm from '@/components/ComposeForm';
 import WriteSetup from '@/components/WriteSetup';
 import { getWriteToken, clearWriteToken, setWriteToken } from '@/lib/token';
@@ -68,8 +68,8 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
         setMyCharacters(mine);
         const myIds = new Set(mine.map(c => c.id));
         // API returns display_name; normalise to name for consistency
-        const normalise = (c: MyCharacter & { display_name?: string }) =>
-          ({ ...c, name: c.name || c.display_name || '' });
+        const normalise = (c: MyCharacter & { display_name?: string; preferred_name?: string }) =>
+          ({ ...c, name: c.name || c.display_name || c.preferred_name || '' });
         setAllCharacters(charsRes.data.filter(c => !myIds.has(c.id)).map(normalise).sort((a, b) => a.name.localeCompare(b.name)));
         setMissions(missionsRes.data);
         setDrafts(draftsRes.data);
@@ -85,6 +85,13 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
 
     fetchData();
   }, [magicToken]);
+
+  // Map id → name for resolving raw IDs stored in draft.authors
+  const charMap = useMemo(() => {
+    const m = new Map<number, string>();
+    [...myCharacters, ...allCharacters].forEach(c => { if (c.name) m.set(c.id, c.name); });
+    return m;
+  }, [myCharacters, allCharacters]);
 
   const myCharNames = new Set(myCharacters.map(c => c.name));
   const myCharIds = new Set(myCharacters.map(c => String(c.id)));
@@ -140,7 +147,7 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
             onClick={() => setTab('drafts')}
             className="flex-1 py-2 rounded-full text-sm font-bold tracking-wide transition-colors"
             style={tab === 'drafts'
-              ? { background: '#FF9900', color: '#000' }
+              ? { background: '#9999CC', color: '#000' }
               : { color: '#9999CC' }}
           >
             Drafts {myDrafts.length > 0 && <span className="ml-1 text-xs opacity-70">({myDrafts.length})</span>}
@@ -185,15 +192,19 @@ export default function WriteTabs({ initialTab, savedBanner, magicToken }: Props
                 <p className="font-medium" style={{ color: '#FFCC99' }}>{draft.title || 'Untitled'}</p>
                 {draft.authors && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {draft.authors.split(',').map(a => a.trim()).filter(Boolean).map(author => (
-                      <span
-                        key={author}
-                        className="text-xs font-medium px-2 py-0.5 rounded-full"
-                        style={{ background: '#3a1f00', color: '#FFCC99', border: '1px solid #FF9900' }}
-                      >
-                        {author}
-                      </span>
-                    ))}
+                    {draft.authors.split(',').map(a => a.trim()).filter(Boolean).map(rawId => {
+                      const id = Number(rawId);
+                      const name = (!isNaN(id) && charMap.get(id)) || rawId;
+                      return (
+                        <span
+                          key={rawId}
+                          className="text-xs font-medium px-2 py-0.5 rounded-full"
+                          style={{ background: '#1a1030', color: '#BBAADD', border: '1px solid #6666AA' }}
+                        >
+                          {name}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
                 <p className="text-xs mt-1.5" style={{ color: '#4a4a6a' }}>{new Date(draft.date).toLocaleDateString()}</p>

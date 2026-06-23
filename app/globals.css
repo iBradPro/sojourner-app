@@ -55,13 +55,16 @@
   /* ── LCARS card ─────────────────────────────────────── */
   .lcars-card {
     background: var(--lcars-panel);
-    border: 1px solid var(--lcars-border);
-    border-left: 3px solid var(--lcars-orange);
+    border: 1px solid #1e1e2e;
+    border-left: 3px solid var(--lcars-purple);
     border-radius: 0 0.75rem 0.75rem 0;
     transition: border-left-color 0.15s;
   }
   .lcars-card:hover {
-    border-left-color: var(--lcars-peach);
+    border-left-color: var(--lcars-orange);
+  }
+  .lcars-card-orange {
+    border-left-color: var(--lcars-orange);
   }
 }
 

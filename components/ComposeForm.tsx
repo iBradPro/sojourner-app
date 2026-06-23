@@ -24,7 +24,7 @@ function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const added = allCharacters.filter(c => selectedIds.includes(c.id));
+  const added = allCharacters.filter(c => selectedIds.includes(c.id) && c.name);
   const filtered = useMemo(() =>
     allCharacters
       .filter(c => c.name && !selectedIds.includes(c.id))
@@ -47,9 +47,9 @@ function CoAuthorPicker({ allCharacters, selectedIds, onAdd, onRemove }: {
         <div className="flex flex-wrap gap-2">
           {added.map(c => (
             <span key={c.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium"
-              style={{ background: '#3a1f00', color: '#FFCC99', border: '1px solid #FF9900' }}>
+              style={{ background: '#1a1030', color: '#BBAADD', border: '1px solid #6666AA' }}>
               {c.name}
-              <button type="button" onClick={() => onRemove(c.id)} className="ml-1 leading-none" style={{ color: '#FF9900' }}>×</button>
+              <button type="button" onClick={() => onRemove(c.id)} className="ml-1 leading-none" style={{ color: '#9999CC' }}>×</button>
             </span>
           ))}
         </div>
@@ -212,7 +212,7 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
               className="px-3 py-1.5 rounded-full text-sm font-bold transition-colors"
               style={selectedAuthors.includes(c.id)
                 ? { background: '#FF9900', color: '#000' }
-                : { background: '#1a1000', color: '#9999CC', border: '1px solid #3a2a0a' }}
+                : { background: '#0d0a1a', color: '#9999CC', border: '1px solid #3a3560' }}
             >
               {c.name}
             </button>
@@ -238,7 +238,7 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
           onClick={() => handleSubmit('saved')}
           disabled={saving}
           className="flex-1 py-3 rounded-full font-bold text-sm tracking-wide transition-colors disabled:opacity-50"
-          style={{ background: '#1a1000', border: '1px solid #9999CC', color: '#9999CC' }}
+          style={{ background: '#0d0a1a', border: '1px solid #6666AA', color: '#9999CC' }}
         >
           {saving ? 'Saving…' : 'Save Draft'}
         </button>
