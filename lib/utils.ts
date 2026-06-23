@@ -38,7 +38,7 @@ export async function scrapeCharacterProfile(id: number): Promise<CharacterProfi
     const res = await fetch(`https://sojourner.simcentral.org/personnel/character/${id}`, {
       next: { revalidate: 3600 },
     });
-    if (!res.ok) return { sections: [], imageUrl: null };
+    if (!res.ok) return { sections: [], imageUrl: null, position: null };
     const html = await res.text();
 
     // Extract first/hero character image
