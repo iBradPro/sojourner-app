@@ -31,6 +31,23 @@ export default async function CrewPage() {
     grouped.get(dept)!.push({ char, imageUrl, position });
   });
 
+  // Sort each department: chief first, assistant chief second, then alphabetical
+  function rankPosition(position: string | null): number {
+    if (!position) return 2;
+    const p = position.toLowerCase();
+    if (/assistant chief|asst\.? chief|deputy chief/.test(p)) return 1;
+    if (/chief|commanding officer|captain|executive officer|first officer|\bxo\b/.test(p)) return 0;
+    return 2;
+  }
+
+  for (const members of grouped.values()) {
+    members.sort((a, b) => {
+      const diff = rankPosition(a.position) - rankPosition(b.position);
+      if (diff !== 0) return diff;
+      return (a.char.preferred_name ?? '').localeCompare(b.char.preferred_name ?? '');
+    });
+  }
+
   // Sort departments by canonical order
   const departments = DEPARTMENT_ORDER.filter(d => grouped.has(d));
 
