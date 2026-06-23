@@ -46,8 +46,8 @@ export default async function Home() {
 
       <div className="px-4 space-y-8">
         <section>
-          <h1 className="text-2xl font-bold tracking-wide" style={{ color: '#FFCC99' }}>USS Sojourner</h1>
-          <p className="text-xs font-mono tracking-widest mt-0.5 mb-3" style={{ color: '#9999CC' }}>NCC-85748</p>
+          <h1 className="text-2xl font-bold tracking-wide" style={{ color: '#FF9900' }}>USS Sojourner</h1>
+          <p className="text-xs font-mono tracking-widest mt-0.5 mb-3" style={{ color: '#FFCC99' }}>NCC-85748</p>
           <p className="text-sm leading-relaxed" style={{ color: '#BBAADD' }}>
             Set in the 25th century in the Delta Quadrant, the Sojourner is deployed as part of the Pathfinder II Project — establishing diplomatic ties with species near the Barzan wormhole, months between refuel and resupply.
           </p>
