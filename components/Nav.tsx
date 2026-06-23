@@ -1,7 +1,41 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PenLine, Rocket, Users, SlidersHorizontal } from 'lucide-react';
+import { PenLine, Rocket, Users, SlidersHorizontal } from 'lucide-react';
+
+function DoorsIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      {/* Door frame */}
+      <rect x="2" y="3" width="20" height="19" rx="1" />
+      {/* Left door panel */}
+      <rect x="3.5" y="4.5" width="7.5" height="17" rx="0.5" />
+      {/* Right door panel */}
+      <rect x="13" y="4.5" width="7.5" height="17" rx="0.5" />
+      {/* Left handle */}
+      <circle cx="10" cy="13" r="0.8" fill={color} stroke="none" />
+      {/* Right handle */}
+      <circle cx="14" cy="13" r="0.8" fill={color} stroke="none" />
+      {/* Center gap line */}
+      <line x1="12" y1="4.5" x2="12" y2="21.5" />
+    </svg>
+  );
+}
+
+function MissionListIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="4.5" cy="6"  r="1.2" fill={color} stroke="none" />
+      <line x1="8" y1="6"  x2="20" y2="6" />
+      <circle cx="4.5" cy="11" r="1.2" fill={color} stroke="none" />
+      <line x1="8" y1="11" x2="20" y2="11" />
+      <circle cx="4.5" cy="16" r="1.2" fill={color} stroke="none" />
+      <line x1="8" y1="16" x2="20" y2="16" />
+      <circle cx="4.5" cy="21" r="1.2" fill={color} stroke="none" />
+      <line x1="8" y1="21" x2="15" y2="21" />
+    </svg>
+  );
+}
 
 function PaddIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
   return (
@@ -21,11 +55,11 @@ function PaddIcon({ color = 'currentColor', size = 20, strokeWidth = 1.5 }) {
 import SojoShipIcon from '@/components/SojoShipIcon';
 
 const links = [
-  { href: '/',         label: 'Home',     icon: (c: string) => <Home size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/',         label: 'Home',     icon: (c: string) => <DoorsIcon size={20} strokeWidth={1.5} color={c} /> },
   { href: '/compose',  label: 'Write',    icon: (c: string) => <PenLine size={20} strokeWidth={1.5} color={c} /> },
   { href: '/posts',    label: 'Posts',    icon: (c: string) => <PaddIcon size={20} strokeWidth={1.5} color={c} /> },
   { href: '/tour',     label: 'Tour',     icon: (c: string) => <SojoShipIcon size={20} strokeWidth={1.5} color={c} /> },
-  { href: '/missions', label: 'Missions', icon: (c: string) => <Rocket size={20} strokeWidth={1.5} color={c} /> },
+  { href: '/missions', label: 'Missions', icon: (c: string) => <MissionListIcon size={20} strokeWidth={1.5} color={c} /> },
   { href: '/crew',     label: 'Crew',     icon: (c: string) => <Users size={20} strokeWidth={1.5} color={c} /> },
   { href: '/settings', label: 'Settings', icon: (c: string) => <SlidersHorizontal size={20} strokeWidth={1.5} color={c} /> },
 ];
