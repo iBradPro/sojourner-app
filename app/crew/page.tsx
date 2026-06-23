@@ -19,6 +19,8 @@ export default async function CrewPage() {
   const grouped = new Map<string, { char: typeof allChars[0]; imageUrl: string | null; position: string | null }[]>();
   allChars.forEach((char, i) => {
     const { imageUrl, position } = profiles[i];
+    // Asterisk on position = retired/former NPC — skip
+    if (position?.trim().endsWith('*')) return;
     const dept = getDepartment(position);
     if (!grouped.has(dept)) grouped.set(dept, []);
     grouped.get(dept)!.push({ char, imageUrl, position });
