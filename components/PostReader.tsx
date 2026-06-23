@@ -1,8 +1,22 @@
 'use client';
 import { useState } from 'react';
-import { formatPostContent } from '@/lib/utils';
 
 const SIZES = ['text-sm', 'text-[15px]', 'text-base', 'text-lg', 'text-xl'] as const;
+
+function renderContent(content: string) {
+  // Split on any run of newlines — each chunk is a paragraph
+  return content.split(/\n+/).map((chunk, i) => {
+    const trimmed = chunk.trim();
+    if (!trimmed) return null;
+    return (
+      <p
+        key={i}
+        style={{ marginBottom: '1em', color: '#e8e0d0' }}
+        dangerouslySetInnerHTML={{ __html: trimmed }}
+      />
+    );
+  });
+}
 
 export default function PostReader({ content }: { content: string }) {
   const [sizeIndex, setSizeIndex] = useState(1);
@@ -30,11 +44,9 @@ export default function PostReader({ content }: { content: string }) {
           A+
         </button>
       </div>
-      <div
-        className={`post-content ${SIZES[sizeIndex]} leading-relaxed`}
-        style={{ color: '#e8e0d0' }}
-        dangerouslySetInnerHTML={{ __html: formatPostContent(content) }}
-      />
+      <div className={`${SIZES[sizeIndex]} leading-relaxed`}>
+        {renderContent(content)}
+      </div>
     </div>
   );
 }
