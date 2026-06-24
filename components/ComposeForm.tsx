@@ -124,7 +124,41 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [lockOwner, setLockOwner] = useState<string | null>(null); // non-null = locked by someone else
   const errorRef = useRef<HTMLDivElement>(null);
+  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Acquire lock when editing an existing draft
+  useEffect(() => {
+    if (!draft) return;
+    const id = draft.id;
+
+    async function acquire() {
+      try {
+        const res = await proxyRequest(`/posts/${id}/lock`, 'POST');
+        if (res.yours) {
+          setLockOwner(null);
+          // Heartbeat every 5 minutes
+          heartbeatRef.current = setInterval(async () => {
+            try { await proxyRequest(`/posts/${id}/lock`, 'PUT'); } catch {}
+          }, 5 * 60 * 1000);
+        }
+      } catch (e: unknown) {
+        // 409 = someone else holds the lock
+        const msg = e instanceof Error ? e.message : '';
+        const match = msg.match(/^(.+)$/);
+        setLockOwner(match?.[1] ?? 'another writer');
+      }
+    }
+
+    acquire();
+
+    return () => {
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+      proxyRequest(`/posts/${id}/lock`, 'DELETE').catch(() => {});
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft?.id]);
 
   useEffect(() => {
     if (error) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -157,6 +191,12 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
         ? await proxyRequest(`/posts/${draft.id}`, 'PATCH', payload)
         : await proxyRequest('/posts', 'POST', payload);
 
+      // Release lock and stop heartbeat before navigating away
+      if (draft) {
+        if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+        await proxyRequest(`/posts/${draft.id}/lock`, 'DELETE').catch(() => {});
+      }
+
       if (status === 'activated') {
         router.push(`/posts/${post.id}`);
       } else {
@@ -168,8 +208,15 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
     }
   }
 
+  const isLocked = lockOwner !== null;
+
   return (
     <div className="space-y-5">
+      {lockOwner && (
+        <div className="rounded-xl px-4 py-3 text-sm" style={{ background: '#1a1000', border: '1px solid #FF9900', color: '#FFCC99' }}>
+          🔒 This post is currently being edited by <strong>{lockOwner}</strong>. You can view it but cannot make changes until they finish.
+        </div>
+      )}
       {error && (
         <div ref={errorRef} className="rounded-xl px-4 py-3 text-sm" style={{ background: '#200', border: '1px solid #662222', color: '#ff9999' }}>{error}</div>
       )}
@@ -181,7 +228,8 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="Post title"
-          className={`w-full px-4 py-3 ${FIELD_FOCUS_CLASS}`}
+          disabled={isLocked}
+          className={`w-full px-4 py-3 ${FIELD_FOCUS_CLASS} disabled:opacity-50`}
           style={FIELD_INPUT}
         />
       </div>
@@ -191,7 +239,8 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
         <select
           value={missionId}
           onChange={e => setMissionId(e.target.value)}
-          className={`w-full px-4 py-3 ${FIELD_FOCUS_CLASS}`}
+          disabled={isLocked}
+          className={`w-full px-4 py-3 ${FIELD_FOCUS_CLASS} disabled:opacity-50`}
           style={FIELD_INPUT}
         >
           <option value="">No mission</option>
@@ -219,7 +268,7 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
       <div className="flex gap-3 pb-4">
         <button
           onClick={() => handleSubmit('saved')}
-          disabled={saving}
+          disabled={saving || isLocked}
           className="flex-1 py-3 rounded-full font-bold text-sm tracking-wide transition-colors disabled:opacity-50"
           style={{ background: '#0d0a1a', border: '1px solid #6666AA', color: '#9999CC' }}
         >
@@ -227,7 +276,7 @@ export default function ComposeForm({ myCharacters, allCharacters, missions, dra
         </button>
         <button
           onClick={() => handleSubmit('activated')}
-          disabled={saving}
+          disabled={saving || isLocked}
           className="flex-1 py-3 rounded-full font-bold text-sm tracking-wide transition-colors disabled:opacity-50"
           style={{ background: '#FF9900', color: '#000' }}
         >

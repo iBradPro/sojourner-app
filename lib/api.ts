@@ -76,6 +76,17 @@ export interface Character {
   preferred_name: string;
 }
 
+export interface LockState {
+  locked: boolean;
+  post_id: number;
+  yours: boolean;
+  acquired?: boolean;
+  renewed?: boolean;
+  released?: boolean;
+  expires_in_minutes: number | null;
+  lock: { user_id: number; owner: string; age_minutes: number; expires_in_minutes: number } | null;
+}
+
 export interface Paginated<T> {
   data: T[];
   page: number;
@@ -113,4 +124,16 @@ export const api = {
 
   deletePost: (id: number) =>
     apiWrite<{ deleted: boolean }>('DELETE', `/posts/${id}`),
+
+  acquireLock: (id: number) =>
+    apiWrite<LockState>('POST', `/posts/${id}/lock`),
+
+  renewLock: (id: number) =>
+    apiWrite<LockState>('PUT', `/posts/${id}/lock`),
+
+  releaseLock: (id: number) =>
+    apiWrite<LockState>('DELETE', `/posts/${id}/lock`),
+
+  checkLock: (id: number) =>
+    apiWrite<LockState>('GET', `/posts/${id}/lock`),
 };
