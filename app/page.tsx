@@ -1,7 +1,7 @@
 import { api } from '@/lib/api';
 import { stripHtml } from '@/lib/utils';
 import Link from 'next/link';
-import Image from 'next/image';
+import HeroSensorsLink from '@/components/HeroSensorsLink';
 
 export default async function Home() {
   const [recentPosts, currentMissions, allMissions, activeChars, npcChars] = await Promise.all([
@@ -33,16 +33,7 @@ export default async function Home() {
 
   return (
     <div className="space-y-8 pb-6">
-      <div className="relative w-full">
-        <Image
-          src="/sojourner-hero.jpg"
-          alt="USS Sojourner NCC-85748"
-          width={1400}
-          height={307}
-          className="w-full h-auto"
-          priority
-        />
-      </div>
+      <HeroSensorsLink />
 
       <div className="px-4 space-y-8">
         <section className="space-y-5">
