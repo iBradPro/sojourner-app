@@ -20,7 +20,7 @@ export default function HeroSensorsLink() {
     start.current = { x: e.clientX, y: e.clientY };
     timer.current = setTimeout(() => {
       timer.current = null;
-      router.push('/sensors');
+      router.push('/tricorder');
     }, HOLD_MS);
   }
 

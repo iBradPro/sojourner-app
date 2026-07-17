@@ -61,7 +61,7 @@ const links = [
 
 export default function Nav() {
   const path = usePathname();
-  if (path.startsWith('/sensors')) return null;
+  if (path.startsWith('/tricorder')) return null;
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ background: '#000', borderTop: '2px solid #9999CC' }}>
       <div className="max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto flex items-center gap-0 px-0.5 py-1.5">
