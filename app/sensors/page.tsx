@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 /* ============================================================
    Mode definitions — palette maps to the site's LCARS tokens
@@ -224,7 +225,37 @@ function startAudio(): AudioRig {
    Component
    ============================================================ */
 
+/* Press-and-hold the LCARS header to exit back to the site — mirrors the
+   hero-banner gesture that opens this display. */
+const EXIT_HOLD_MS = 650;
+const EXIT_MOVE_TOLERANCE = 12;
+
 export default function SensorsPage() {
+  const router = useRouter();
+  const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exitStart = useRef<{ x: number; y: number } | null>(null);
+
+  function exitBegin(e: React.PointerEvent) {
+    exitStart.current = { x: e.clientX, y: e.clientY };
+    exitTimer.current = setTimeout(() => {
+      exitTimer.current = null;
+      router.push('/');
+    }, EXIT_HOLD_MS);
+  }
+
+  function exitCancel() {
+    if (exitTimer.current) clearTimeout(exitTimer.current);
+    exitTimer.current = null;
+    exitStart.current = null;
+  }
+
+  function exitMove(e: React.PointerEvent) {
+    if (!exitStart.current) return;
+    if (Math.hypot(e.clientX - exitStart.current.x, e.clientY - exitStart.current.y) > EXIT_MOVE_TOLERANCE) {
+      exitCancel();
+    }
+  }
+
   const [modeKey, setModeKey] = useState<ModeKey>('bio');
   const [rows, setRows] = useState<Row[]>([]);
   const [scan, setScan] = useState(1);
@@ -557,8 +588,17 @@ export default function SensorsPage() {
     <div className="px-4 py-4 space-y-3">
       <style>{`@keyframes sensor-blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }`}</style>
 
-      {/* LCARS header */}
-      <div className="flex items-stretch gap-1.5">
+      {/* LCARS header — press and hold to exit */}
+      <div
+        className="flex items-stretch gap-1.5 select-none"
+        style={{ WebkitTouchCallout: 'none' }}
+        onPointerDown={exitBegin}
+        onPointerUp={exitCancel}
+        onPointerLeave={exitCancel}
+        onPointerCancel={exitCancel}
+        onPointerMove={exitMove}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <div className="w-9 flex-none" style={{ background: accent, borderRadius: '18px 0 0 18px' }} />
         <div className="flex-1 py-1.5 px-3" style={{ borderTop: `4px solid ${accent}`, background: '#000' }}>
           <h1 className="text-base font-bold tracking-[0.14em]" style={{ color: '#FFCC99' }}>
