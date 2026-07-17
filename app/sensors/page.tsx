@@ -263,6 +263,7 @@ export default function SensorsPage() {
   const [status, setStatus] = useState(STATUS_LINES[0]);
   const [ticker, setTicker] = useState('');
   const [audioOn, setAudioOn] = useState(false);
+  const [emrg, setEmrg] = useState(false);
 
   const sweepRef = useRef<HTMLCanvasElement>(null);
   const waveRef = useRef<HTMLCanvasElement>(null);
@@ -562,153 +563,359 @@ export default function SensorsPage() {
   const def = MODES[modeKey];
   const accent = def.accent;
 
-  const panelHead = (title: string, right?: React.ReactNode) => (
-    <div
-      className="flex items-center justify-between px-2.5 py-1 text-[10px] font-bold tracking-[0.22em]"
-      style={{ color: accent, borderBottom: '1px solid #1c1c26', background: `${accent}0d` }}
-    >
-      <span>{title}</span>
-      {right ?? (
-        <span
-          className="inline-block w-2 h-2 rounded-full"
-          style={{ background: accent, animation: 'sensor-blink 1.2s infinite' }}
-        />
-      )}
+  function keyBeep() {
+    audioRef.current?.beep(rand(750, 1250), 0.05, 0.3);
+  }
+
+  function fireEmrg() {
+    setEmrg(true);
+    const au = audioRef.current;
+    if (au) {
+      au.beep(520, 0.18, 0.6);
+      setTimeout(() => audioRef.current?.beep(520, 0.18, 0.6), 260);
+      setTimeout(() => audioRef.current?.beep(680, 0.3, 0.6), 540);
+    }
+    setTimeout(() => setEmrg(false), 2800);
+  }
+
+  const chassisText = '#23262e';
+  const cream = { background: 'linear-gradient(#f6efdb, #e2d9bf)' };
+
+  const bracketLabel = (label: string) => (
+    <div className="flex items-center gap-2 mb-1.5">
+      <div className="flex-1 h-[2px] rounded" style={{ background: '#3a3e48' }} />
+      <span className="text-[9px] font-bold tracking-[0.25em]" style={{ color: chassisText }}>{label}</span>
+      <div className="flex-1 h-[2px] rounded" style={{ background: '#3a3e48' }} />
     </div>
   );
 
-  const panelStyle: React.CSSProperties = {
-    background: '#050508',
-    border: '1px solid #23232e',
-    borderRadius: '0.375rem',
-    overflow: 'hidden',
-  };
-
   return (
-    <div className="px-4 py-4 space-y-3">
-      <style>{`@keyframes sensor-blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }`}</style>
+    <div className="px-2 py-3 flex justify-center">
+      <style>{`
+        @keyframes sensor-blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+        @keyframes tr-blink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+        .tr-key {
+          background: linear-gradient(#f6efdb, #e2d9bf);
+          border: 1px solid #5c5648;
+          border-radius: 5px;
+          box-shadow: 0 2px 0 #6e6858, 0 3px 4px rgba(0,0,0,.35);
+          color: #17150f;
+          font-weight: 700;
+        }
+        .tr-key:active {
+          transform: translateY(2px);
+          box-shadow: 0 0 0 #6e6858, inset 0 1px 3px rgba(0,0,0,.35);
+        }
+      `}</style>
 
-      {/* LCARS header — press and hold to exit */}
       <div
-        className="flex items-stretch gap-1.5 select-none"
-        style={{ WebkitTouchCallout: 'none' }}
-        onPointerDown={exitBegin}
-        onPointerUp={exitCancel}
-        onPointerLeave={exitCancel}
-        onPointerCancel={exitCancel}
-        onPointerMove={exitMove}
-        onContextMenu={(e) => e.preventDefault()}
+        className="w-full max-w-[420px] select-none"
+        style={{
+          background: 'linear-gradient(160deg, #b6bbc6 0%, #a3a8b4 55%, #8f94a1 100%)',
+          borderRadius: 26,
+          border: '2px solid #5f6470',
+          boxShadow:
+            'inset 0 2px 3px rgba(255,255,255,.55), inset 0 -6px 12px rgba(0,0,0,.25), 0 12px 30px rgba(0,0,0,.7)',
+        }}
       >
-        <div className="w-9 flex-none" style={{ background: accent, borderRadius: '18px 0 0 18px' }} />
-        <div className="flex-1 py-1.5 px-3" style={{ borderTop: `4px solid ${accent}`, background: '#000' }}>
-          <h1 className="text-base font-bold tracking-[0.14em]" style={{ color: '#FFCC99' }}>
-            MAIN SENSOR ARRAY
-          </h1>
-          <p className="text-[10px] tracking-[0.28em]" style={{ color: '#BBAADD' }}>
-            USS SOJOURNER · NCC-85748 · DELTA QUADRANT
-          </p>
-        </div>
-        <div className="w-9 flex-none" style={{ background: '#9999CC', borderRadius: '0 18px 18px 0' }} />
-      </div>
+        {/* ===== top shell ===== */}
 
-      {/* mode pills */}
-      <div className="grid grid-cols-4 gap-1.5">
-        {MODE_KEYS.map((key) => {
-          const m = MODES[key];
-          const active = key === modeKey;
-          return (
-            <button
-              key={key}
-              onClick={() => selectMode(key)}
-              className="py-2 rounded-full text-[11px] font-bold tracking-wide transition-all"
+        {/* top cap — press & hold to close the tricorder */}
+        <div
+          className="px-4 pt-4 pb-3"
+          style={{ WebkitTouchCallout: 'none' }}
+          onPointerDown={exitBegin}
+          onPointerUp={exitCancel}
+          onPointerLeave={exitCancel}
+          onPointerCancel={exitCancel}
+          onPointerMove={exitMove}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <div className="flex items-center gap-2.5">
+            <div
+              className="h-3.5 w-11 rounded-sm"
               style={{
-                background: m.accent,
-                color: '#000',
-                opacity: active ? 1 : 0.55,
-                boxShadow: active ? `0 0 14px 2px ${m.accent}88` : 'none',
+                background: '#d9569b',
+                boxShadow: '0 0 8px #d9569b77, inset 0 1px 1px rgba(255,255,255,.5)',
+                animation: emrg ? 'tr-blink .35s infinite' : undefined,
+              }}
+            />
+            <div className="flex gap-[3px] p-[3px] rounded-sm" style={{ background: '#20241e' }}>
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-3.5 w-3.5"
+                  style={{
+                    background: '#9fd65c',
+                    opacity: i === MODE_KEYS.indexOf(modeKey) % 3 ? 0.35 : 1,
+                    boxShadow: '0 0 6px #9fd65c55',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* control key row */}
+        <div className="px-4 pb-3 flex items-center gap-2">
+          <div className="flex flex-col items-center gap-1">
+            <button className="tr-key px-2 py-1 text-[10px] tracking-wider" onClick={toggleAudio}>PWR</button>
+            <div
+              className="h-2 w-7 rounded-sm"
+              style={{
+                background: audioOn ? '#d9569b' : '#463844',
+                boxShadow: audioOn ? '0 0 8px #d9569baa' : 'inset 0 1px 2px rgba(0,0,0,.6)',
+              }}
+            />
+          </div>
+          <span className="text-[12px] font-black" style={{ color: chassisText }}>
+            Σ<span className="text-[8px] align-sub">x</span> SYS
+          </span>
+          <button className="tr-key px-2 py-0.5 text-[9px] leading-[1.2]" onClick={keyBeep}>
+            F1<br />F2
+          </button>
+          <span className="text-[8px] font-bold tracking-[0.15em] leading-[1.3]" style={{ color: chassisText }}>
+            -DATA<br />SENSE-
+          </span>
+          <div className="flex-1" />
+          <button className="tr-key px-3 py-1.5 text-[11px]" onClick={keyBeep}>I</button>
+          <button className="tr-key px-3 py-1.5 text-[11px]" onClick={keyBeep}>E</button>
+        </div>
+
+        {/* library column + display */}
+        <div className="px-4 pb-3 flex gap-3">
+          <div className="flex-none w-[72px] flex flex-col py-1">
+            {(['bio', 'geo', 'em', 'met'] as ModeKey[]).map((mode, i) => (
+              <button key={mode} onClick={() => selectMode(mode)} className="flex items-center gap-1.5 py-1.5 text-left">
+                <span
+                  className="h-2 w-2 rounded-full flex-none"
+                  style={
+                    modeKey === mode
+                      ? { background: '#9fd65c', boxShadow: '0 0 7px #9fd65c' }
+                      : { background: '#565b52', boxShadow: 'inset 0 1px 1px rgba(0,0,0,.5)' }
+                  }
+                />
+                <span className="text-[10px] font-bold tracking-[0.12em]" style={{ color: chassisText }}>
+                  {['ALPHA', 'BETA', 'GAMMA', 'DELTA'][i]}
+                </span>
+              </button>
+            ))}
+            <span className="text-[10px] font-bold tracking-[0.12em] mt-1" style={{ color: chassisText }}>
+              LIBRARY
+            </span>
+            <div
+              className="mt-1.5 h-16 w-8 rounded-sm relative"
+              style={{ background: '#15161a', boxShadow: 'inset 0 2px 5px rgba(0,0,0,.8)' }}
+            >
+              <span className="absolute left-1 bottom-0.5 text-[8px] font-bold" style={{ color: '#cfd3da' }}>A</span>
+              <span className="absolute right-1 top-0.5 text-[8px] font-bold" style={{ color: '#cfd3da' }}>B</span>
+              <div className="absolute left-1/2 -translate-x-1/2 top-1.5 bottom-1.5 w-[3px] rounded" style={{ background: '#cfd3da' }} />
+            </div>
+          </div>
+
+          {/* screen bezel */}
+          <div className="flex-1 rounded-lg p-1.5 min-w-0" style={{ background: '#40444e', boxShadow: 'inset 0 2px 6px rgba(0,0,0,.7)' }}>
+            <div
+              className="rounded-md overflow-hidden"
+              style={{
+                background: '#000',
+                border: emrg ? `2px solid ${SALMON}` : '2px solid #1b1d24',
               }}
             >
-              {m.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="md:grid md:grid-cols-2 md:gap-3 space-y-3 md:space-y-0">
-        {/* proximity sweep */}
-        <div style={panelStyle} className="relative md:row-span-2 flex flex-col">
-          {panelHead(def.sweepTitle)}
-          <canvas ref={sweepRef} className="w-full aspect-square md:aspect-auto md:flex-1 max-h-[340px] md:max-h-none block" />
-          <div
-            ref={lockElRef}
-            className="absolute left-0 right-0 bottom-2 text-center text-[10px] tracking-[0.35em] pointer-events-none"
-            style={{ color: SALMON, visibility: 'hidden', animation: 'sensor-blink .5s infinite' }}
-          >
-            ▲ CONTACT ISOLATED ▲
-          </div>
-        </div>
-
-        {/* waveform */}
-        <div style={panelStyle}>
-          {panelHead(def.waveTitle, <span ref={waveValRef} className="tracking-[0.08em]" />)}
-          <canvas ref={waveRef} className="w-full h-36 block" />
-        </div>
-
-        {/* spectral bars */}
-        <div style={panelStyle}>
-          {panelHead('SPECTRAL DECOMPOSITION')}
-          <canvas ref={specRef} className="w-full h-28 block" />
-        </div>
-
-        {/* telemetry */}
-        <div style={panelStyle} className="md:col-span-2">
-          {panelHead(def.dataTitle, <span>SCAN {String(scan).padStart(4, '0')}</span>)}
-          <div className="px-2.5 py-1.5 text-[12px] leading-[1.55] tracking-[0.06em]">
-            {rows.map((r) => (
-              <div key={r.k} className="flex justify-between whitespace-nowrap">
-                <span style={{ color: '#9999CC' }}>{r.k}</span>
-                <span
-                  className="tabular-nums"
-                  style={
-                    r.alert
-                      ? { color: SALMON, animation: 'sensor-blink .8s infinite' }
-                      : { color: '#FFCC99' }
-                  }
-                >
-                  {r.v}
-                </span>
+              <div
+                className="flex items-center justify-between px-2 py-1 text-[9px] font-bold tracking-[0.2em]"
+                style={{ color: accent, borderBottom: '1px solid #1c1c26' }}
+              >
+                <span>{def.sweepTitle}</span>
+                <span>{String(scan).padStart(4, '0')}</span>
               </div>
-            ))}
-          </div>
-          <div
-            className="h-5 overflow-hidden flex items-center whitespace-nowrap text-[10px] tracking-[0.12em]"
-            style={{ borderTop: '1px solid #1c1c26', color: '#6a6a8a' }}
-          >
-            <span className="px-2">{ticker}</span>
-          </div>
-        </div>
-      </div>
 
-      {/* footer bars */}
-      <div className="flex items-stretch gap-1.5 text-[11px] font-bold tracking-[0.12em]">
-        <div className="w-9 flex-none" style={{ background: '#9999CC', borderRadius: '18px 0 0 18px' }} />
-        <div className="px-3 flex items-center rounded" style={{ background: '#FFCC99', color: '#000' }}>
-          STARDATE {stardate}
+              <div className="relative">
+                <canvas ref={sweepRef} className="w-full aspect-square block" />
+                <div
+                  ref={lockElRef}
+                  className="absolute left-0 right-0 bottom-1 text-center text-[9px] tracking-[0.3em] pointer-events-none"
+                  style={{ color: SALMON, visibility: 'hidden', animation: 'sensor-blink .5s infinite' }}
+                >
+                  ▲ CONTACT ISOLATED ▲
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid #1c1c26' }}>
+                <div className="flex items-center justify-between px-2 pt-1 text-[8px] font-bold tracking-[0.18em]" style={{ color: accent }}>
+                  <span>{def.waveTitle}</span>
+                  <span ref={waveValRef} />
+                </div>
+                <canvas ref={waveRef} className="w-full h-16 block" />
+              </div>
+
+              <canvas ref={specRef} className="w-full h-12 block" style={{ borderTop: '1px solid #1c1c26' }} />
+
+              <div className="px-2 py-1 text-[10px] leading-[1.5] tracking-[0.04em]" style={{ borderTop: '1px solid #1c1c26' }}>
+                {rows.map((r) => (
+                  <div key={r.k} className="flex justify-between gap-2 whitespace-nowrap overflow-hidden">
+                    <span className="truncate" style={{ color: '#9999CC' }}>{r.k}</span>
+                    <span
+                      className="tabular-nums flex-none"
+                      style={
+                        r.alert
+                          ? { color: SALMON, animation: 'sensor-blink .8s infinite' }
+                          : { color: '#FFCC99' }
+                      }
+                    >
+                      {r.v}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                className="px-2 h-4 flex items-center overflow-hidden whitespace-nowrap text-[8px] tracking-[0.1em]"
+                style={{ borderTop: '1px solid #1c1c26', color: '#494960' }}
+              >
+                <span>{ticker}</span>
+              </div>
+
+              <div
+                className="px-2 py-0.5 flex justify-between gap-2 text-[8px] tracking-[0.08em] overflow-hidden whitespace-nowrap"
+                style={{ borderTop: '1px solid #1c1c26', color: emrg ? SALMON : '#6a6a8a' }}
+              >
+                <span className="flex-none">SD {stardate}</span>
+                <span className="truncate">{emrg ? '⚠ EMERGENCY BEACON ACTIVE' : status}</span>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* device input */}
+        <div className="px-4 pb-4">
+          {bracketLabel('DEVICE INPUT')}
+          <div className="flex items-center gap-2">
+            {(['geo', 'met', 'bio', 'em'] as ModeKey[]).map((key) => {
+              const active = key === modeKey;
+              return (
+                <button
+                  key={key}
+                  onClick={() => selectMode(key)}
+                  className="tr-key flex-1 py-1.5 text-[10px] tracking-wider"
+                  style={{
+                    background: `linear-gradient(#f3c96a 0%, #dfa93e 38%, #f6efdb 38%, #e2d9bf 100%)`,
+                    boxShadow: active
+                      ? `0 2px 0 #6e6858, 0 0 10px 2px ${MODES[key].accent}99`
+                      : undefined,
+                  }}
+                >
+                  <span className="block pt-1.5">{{ geo: 'GEO', met: 'MET', bio: 'BIO', em: 'EM' }[key]}</span>
+                </button>
+              );
+            })}
+            <div className="flex flex-col gap-[3px] p-[3px] rounded-sm" style={{ background: '#20241e' }}>
+              <div className="h-2.5 w-2.5" style={{ background: '#9fd65c', boxShadow: '0 0 5px #9fd65c66' }} />
+              <div className="h-2.5 w-2.5" style={{ background: '#3d4438' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* ===== hinge ===== */}
         <div
-          className="flex-1 px-3 flex items-center overflow-hidden"
-          style={{ color: '#BBAADD', borderBottom: '4px solid #9999CC' }}
+          className="h-8 flex justify-around items-center"
+          style={{
+            background: 'linear-gradient(#7c8090, #6a6e7c)',
+            borderTop: '2px solid #565a66',
+            borderBottom: '2px solid #565a66',
+          }}
         >
-          <span className="truncate font-normal">{status}</span>
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="h-6 w-20 rounded-sm"
+              style={{
+                background: 'linear-gradient(#9da2ae, #7c8090 45%, #565a66)',
+                border: '1px solid #4a4e5a',
+                boxShadow: '0 1px 2px rgba(0,0,0,.5)',
+              }}
+            />
+          ))}
         </div>
-        <button
-          onClick={toggleAudio}
-          className="px-3 rounded"
-          style={{ background: audioOn ? '#FF9900' : '#9999CC', color: '#000' }}
-        >
-          AUDIO {audioOn ? 'ON' : 'OFF'}
-        </button>
-        <div className="w-6 flex-none" style={{ background: accent, borderRadius: '0 18px 18px 0' }} />
+
+        {/* ===== bottom shell ===== */}
+        <div className="px-4 pt-4 pb-4">
+          {bracketLabel('COM TRANSMISSION')}
+          <div className="flex gap-3 items-stretch">
+            <div className="flex-1 flex flex-col gap-2">
+              <button className="tr-key py-2 text-[10px] leading-[1.35] tracking-wider" onClick={keyBeep}>
+                ACPT<br />POOL
+              </button>
+              <button className="tr-key py-2 text-[10px] leading-[1.35] tracking-wider" onClick={keyBeep}>
+                INTRSHP<br />TRICRDR
+              </button>
+            </div>
+            <div
+              className="flex flex-col justify-center text-[11px] font-black leading-[1.15] text-center"
+              style={{ color: chassisText }}
+            >
+              E<br />M<br />R<br />G
+            </div>
+            <button
+              onClick={fireEmrg}
+              className="w-28 rounded-md p-2"
+              style={{
+                background: 'linear-gradient(145deg, #2b2d33, #17181c)',
+                border: '1px solid #0d0e11',
+                boxShadow: 'inset 0 1px 2px rgba(255,255,255,.15), 0 2px 4px rgba(0,0,0,.4)',
+              }}
+            >
+              <div
+                className="h-full min-h-16 rounded"
+                style={{
+                  background: 'radial-gradient(circle at 42% 35%, #a33a4a, #5e1620 75%)',
+                  boxShadow: 'inset 0 -3px 6px rgba(0,0,0,.6), inset 0 2px 3px rgba(255,255,255,.2)',
+                  animation: emrg ? 'tr-blink .35s infinite' : undefined,
+                }}
+              />
+            </button>
+          </div>
+
+          <div className="flex gap-4 mt-4">
+            <div className="flex-1">
+              {bracketLabel('IMAGE RECORD')}
+              <div className="flex gap-2">
+                <button className="tr-key flex-1 py-1.5 text-[9px] leading-[1.35] tracking-wider" onClick={keyBeep}>
+                  FWD<br />INPUT
+                </button>
+                <button className="tr-key flex-1 py-1.5 text-[9px] leading-[1.35] tracking-wider" onClick={keyBeep}>
+                  RVS<br />ERASE
+                </button>
+              </div>
+            </div>
+            <div className="w-28">
+              {bracketLabel('LIBRARY B')}
+              <div className="flex gap-2">
+                <button className="tr-key flex-1 py-1.5 text-[11px]" onClick={keyBeep}>I</button>
+                <button className="tr-key flex-1 py-1.5 text-[11px]" onClick={keyBeep}>E</button>
+              </div>
+            </div>
+          </div>
+
+          {/* ID plate */}
+          <div className="mt-5 flex items-center gap-2.5">
+            <button className="rounded-sm p-1.5 flex-none" style={{ background: '#17181c' }} onClick={keyBeep}>
+              <span className="block h-3 w-3" style={{ background: '#d9569b', boxShadow: '0 0 6px #d9569b99' }} />
+            </button>
+            <span className="text-[9px] font-bold" style={{ color: chassisText }}>ID</span>
+            <div
+              className="flex-1 rounded-sm px-2 py-1 text-center"
+              style={{ ...cream, border: '1px solid #5c5648' }}
+            >
+              <p className="text-[10px] font-black tracking-[0.12em]" style={{ color: '#17150f' }}>
+                TR-580 TRICORDER VII
+              </p>
+              <p className="text-[8px] font-bold tracking-[0.16em]" style={{ color: '#17150f' }}>
+                STARFLEET R&D — SAN FRANCISCO
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
