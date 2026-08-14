@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "sojourner",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3456"],
+      "runtimeExecutable": "railway",
+      "runtimeArgs": ["run", "npm", "run", "dev", "--", "--port", "3456"],
       "port": 3456
     }
   ]

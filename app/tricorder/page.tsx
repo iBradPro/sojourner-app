@@ -150,6 +150,59 @@ function makeNoise(seedCount = 8) {
   };
 }
 
+/* Draws a smooth closed silhouette through a point loop (Chaikin-style corner
+   cutting via quadratic curves through segment midpoints) — used for the BIO
+   body outline so it reads as hollow line art rather than straight stick limbs. */
+function smoothClosedPath(ctx: CanvasRenderingContext2D, pts: [number, number][]) {
+  const n = pts.length;
+  if (n < 3) return;
+  const midStart: [number, number] = [(pts[0][0] + pts[n - 1][0]) / 2, (pts[0][1] + pts[n - 1][1]) / 2];
+  ctx.beginPath();
+  ctx.moveTo(midStart[0], midStart[1]);
+  for (let i = 0; i < n; i++) {
+    const cur = pts[i];
+    const next = pts[(i + 1) % n];
+    const mid: [number, number] = [(cur[0] + next[0]) / 2, (cur[1] + next[1]) / 2];
+    ctx.quadraticCurveTo(cur[0], cur[1], mid[0], mid[1]);
+  }
+  ctx.closePath();
+}
+
+/* One side of a hollow humanoid outline (neck → shoulder → arm → torso → leg → foot),
+   as [x-offset-fraction-of-w, y-fraction-of-h] pairs. Mirrored across the shared
+   crotch point below, this closes into a full front-facing body silhouette. */
+const BODY_HALF: [number, number][] = [
+  [0.045, 0.165], // neck
+  [0.185, 0.205], // shoulder
+  [0.215, 0.27], // arm outer, upper
+  [0.2, 0.35], // arm outer, elbow
+  [0.175, 0.42], // arm outer, lower
+  [0.16, 0.47], // hand, outer
+  [0.115, 0.468], // hand, inner
+  [0.135, 0.35], // arm inner, elbow
+  [0.1, 0.275], // armpit (pinch)
+  [0.125, 0.33], // ribcage
+  [0.095, 0.42], // waist
+  [0.145, 0.5], // hip
+  [0.125, 0.58], // leg outer, upper
+  [0.105, 0.7], // knee, outer
+  [0.095, 0.83], // shin, outer
+  [0.09, 0.93], // ankle, outer
+  [0.115, 0.955], // foot tip, outer
+  [0.04, 0.955], // foot tip, inner
+  [0.035, 0.9], // ankle, inner
+  [0.03, 0.78], // shin, inner
+  [0.025, 0.66], // knee, inner
+  [0.02, 0.56], // leg inner, upper
+];
+const BODY_CROTCH: [number, number] = [0, 0.535];
+
+function bodyOutlinePoints(cx: number, w: number, h: number): [number, number][] {
+  const right = BODY_HALF.map(([fx, fy]): [number, number] => [cx + fx * w, fy * h]);
+  const left = [...BODY_HALF].reverse().map(([fx, fy]): [number, number] => [cx - fx * w, fy * h]);
+  return [...right, [cx + BODY_CROTCH[0] * w, BODY_CROTCH[1] * h], ...left];
+}
+
 function fitCanvas(cv: HTMLCanvasElement) {
   const r = cv.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -270,6 +323,7 @@ export default function SensorsPage() {
   const specRef = useRef<HTMLCanvasElement>(null);
   const waveValRef = useRef<HTMLSpanElement>(null);
   const lockElRef = useRef<HTMLDivElement>(null);
+  const lockTextRef = useRef<HTMLSpanElement>(null);
 
   const modeRef = useRef<{ key: ModeKey; changedAt: number }>({ key: 'bio', changedAt: 0 });
   const blipsRef = useRef<Blip[]>([]);
@@ -337,16 +391,226 @@ export default function SensorsPage() {
     let raf = 0;
     let lastBlip = 0;
 
-    function drawSweep(t: number) {
-      const cv = sweepRef.current;
-      if (!cv) return;
-      const { ctx, w, h } = fitCanvas(cv);
-      ctx.clearRect(0, 0, w, h);
+    /* BIO — humanoid silhouette, vertical scan line, vitals pulse, anomaly markers on the body */
+    function drawBio(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, ac: string) {
+      const cx = w / 2;
+
+      ctx.strokeStyle = ac;
+      ctx.globalAlpha = 0.08;
+      ctx.lineWidth = 1;
+      for (let y = h * 0.06; y < h; y += h * 0.12) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      const headR = w * 0.082;
+      const headY = h * 0.105;
+      const footY = h * 0.955;
+
+      const bodyPts = bodyOutlinePoints(cx, w, h);
+      smoothClosedPath(ctx, bodyPts);
+      ctx.globalAlpha = 0.05;
+      ctx.fillStyle = ac;
+      ctx.fill();
+      ctx.globalAlpha = 0.65;
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = ac;
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.65;
+      ctx.beginPath();
+      ctx.arc(cx, headY, headR, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const cyc = (t * 0.35) % 2;
+      const scanY = (cyc < 1 ? cyc : 2 - cyc) * h;
+      const band = ctx.createLinearGradient(0, scanY - h * 0.08, 0, scanY + h * 0.08);
+      band.addColorStop(0, 'rgba(0,0,0,0)');
+      band.addColorStop(0.5, ac + '55');
+      band.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = band;
+      ctx.fillRect(0, scanY - h * 0.08, w, h * 0.16);
+      ctx.strokeStyle = ac;
+      ctx.globalAlpha = 0.9;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = ac;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.moveTo(0, scanY);
+      ctx.lineTo(w, scanY);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      const beat = (t * 1.25) % 1;
+      const pulse = beat < 0.12 ? Math.sin((beat / 0.12) * Math.PI) : 0;
+      ctx.globalAlpha = 0.5 + pulse * 0.5;
+      ctx.fillStyle = SALMON;
+      ctx.beginPath();
+      ctx.arc(cx, h * 0.3, w * 0.02 + pulse * w * 0.015, 0, Math.PI * 2);
+      ctx.fill();
+
+      let anyMajorLit = false;
+      for (const b of blipsRef.current) {
+        const age = (t - b.born) / b.life;
+        const alpha = Math.max(0, 1 - age);
+        const bx = cx + Math.cos(b.ang) * w * 0.22;
+        const by = headY + b.dist * (footY - headY);
+        ctx.globalAlpha = alpha * (b.major ? 0.9 : 0.5);
+        ctx.fillStyle = b.major ? SALMON : ac;
+        ctx.beginPath();
+        ctx.arc(bx, by, b.major ? 4.5 : 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        if (b.major) {
+          ctx.strokeStyle = SALMON;
+          ctx.lineWidth = 1;
+          ctx.globalAlpha = alpha * 0.6;
+          ctx.beginPath();
+          ctx.arc(bx, by, 8 + Math.sin(t * 6) * 2, 0, Math.PI * 2);
+          ctx.stroke();
+          if (age < 0.7) anyMajorLit = true;
+        }
+      }
+      ctx.globalAlpha = 1;
+      return anyMajorLit;
+    }
+
+    /* GEO — layered strata cross-section with a depth-sounding scan line and deposit markers */
+    function drawGeo(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, ac: string) {
+      const layers = 6;
+      const layerH = h / layers;
+      for (let i = 0; i < layers; i++) {
+        const yTop = i * layerH;
+        ctx.beginPath();
+        ctx.moveTo(0, yTop);
+        const segs = 10;
+        for (let s = 0; s <= segs; s++) {
+          const x = (s / segs) * w;
+          const wob = Math.sin(x * 0.02 + i * 1.7) * layerH * 0.18 + Math.sin(x * 0.05 + i) * layerH * 0.08;
+          ctx.lineTo(x, yTop + wob);
+        }
+        ctx.lineTo(w, yTop + layerH * 1.3);
+        ctx.lineTo(0, yTop + layerH * 1.3);
+        ctx.closePath();
+        ctx.globalAlpha = 0.08 + i * 0.05;
+        ctx.fillStyle = ac;
+        ctx.fill();
+        ctx.globalAlpha = 0.25;
+        ctx.strokeStyle = ac;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      const cyc = (t * 0.3) % 2;
+      const scanX = (cyc < 1 ? cyc : 2 - cyc) * w;
+      ctx.strokeStyle = ac;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = ac;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.moveTo(scanX, 0);
+      ctx.lineTo(scanX, h);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      let anyMajorLit = false;
+      for (const b of blipsRef.current) {
+        const age = (t - b.born) / b.life;
+        const alpha = Math.max(0, 1 - age);
+        const bx = (((b.ang / (Math.PI * 2)) % 1) + 1) % 1 * w;
+        const by = b.dist * h;
+        const lit = Math.abs(bx - scanX) < w * 0.05;
+        ctx.globalAlpha = alpha * (b.major ? 0.95 : 0.55);
+        ctx.fillStyle = b.major ? SALMON : ac;
+        ctx.save();
+        ctx.translate(bx, by);
+        ctx.rotate(Math.PI / 4);
+        const s = b.major ? 5 : 3;
+        ctx.fillRect(-s / 2, -s / 2, s, s);
+        ctx.restore();
+        if (b.major && lit) {
+          ctx.strokeStyle = SALMON;
+          ctx.globalAlpha = alpha * 0.7;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(bx, by, 8 + Math.sin(t * 6) * 2, 0, Math.PI * 2);
+          ctx.stroke();
+          if (age < 0.7) anyMajorLit = true;
+        }
+      }
+      ctx.globalAlpha = 1;
+      return anyMajorLit;
+    }
+
+    /* EM — radiating energy spikes from a central node, with discharge flares */
+    function drawEmField(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, ac: string) {
+      const cx = w / 2,
+        cy = h / 2;
+      const R = Math.min(w, h) * 0.46;
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      ctx.strokeStyle = ac;
+      ctx.globalAlpha = 0.15;
+      ctx.lineWidth = 1;
+      for (let i = 1; i <= 3; i++) {
+        ctx.beginPath();
+        ctx.arc(0, 0, (R * i) / 3, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      const spikes = 20;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = ac;
+      const flickerIdx = Math.floor(t * 7) % spikes;
+      for (let i = 0; i < spikes; i++) {
+        const a = (i / spikes) * Math.PI * 2;
+        const n = Math.sin(a * 5 + t * 3.4) * 0.5 + Math.sin(a * 11 - t * 5.1) * 0.3;
+        let len = R * (0.3 + 0.35 * Math.abs(n));
+        if (i === flickerIdx) len = R * 0.95;
+        ctx.globalAlpha = 0.35 + 0.5 * (len / R);
+        ctx.shadowBlur = 4 + (len / R) * 6;
+        ctx.strokeStyle = i === flickerIdx ? SALMON : ac;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(a) * len, Math.sin(a) * len);
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = ac;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      let anyMajorLit = false;
+      for (const b of blipsRef.current) {
+        const age = (t - b.born) / b.life;
+        const flash = Math.max(0, 1 - age * 3);
+        const alpha = Math.max(0.15, flash);
+        const bx = cx + Math.cos(b.ang) * b.dist * R;
+        const by = cy + Math.sin(b.ang) * b.dist * R;
+        ctx.globalAlpha = alpha * (b.major ? 1 : 0.6);
+        ctx.fillStyle = b.major ? SALMON : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(bx, by, (b.major ? 4 : 2) * (1 + flash), 0, Math.PI * 2);
+        ctx.fill();
+        if (b.major && flash > 0.3) anyMajorLit = true;
+      }
+      ctx.globalAlpha = 1;
+      return anyMajorLit;
+    }
+
+    /* MET — rotating weather-radar sweep with amorphous, intensity-graded storm cells */
+    function drawMet(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, ac: string) {
       const cx = w / 2,
         cy = h / 2;
       const R = Math.min(w, h) * 0.44;
-      const ac = MODES[modeRef.current.key].accent;
-
       ctx.save();
       ctx.translate(cx, cy);
 
@@ -366,13 +630,8 @@ export default function SensorsPage() {
         ctx.lineTo(Math.cos(a) * R, Math.sin(a) * R);
         ctx.stroke();
       }
-      ctx.globalAlpha = 0.5;
-      ctx.fillStyle = ac;
-      ctx.font = `${Math.max(8, R * 0.07)}px var(--font-geist-sans), sans-serif`;
-      ctx.textAlign = 'left';
-      for (let i = 1; i <= 4; i++) ctx.fillText(i * 25 + 'm', 3, (-R * i) / 4 + 11);
 
-      const sweepAng = (t * 0.9) % (Math.PI * 2);
+      const sweepAng = (t * 0.7) % (Math.PI * 2);
       if (typeof ctx.createConicGradient === 'function') {
         const grad = ctx.createConicGradient(sweepAng, 0, 0);
         grad.addColorStop(0, ac + 'cc');
@@ -385,41 +644,42 @@ export default function SensorsPage() {
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, R, 0, Math.PI * 2);
         ctx.fill();
-      } else {
-        ctx.globalAlpha = 0.8;
-        ctx.strokeStyle = ac;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(sweepAng) * R, Math.sin(sweepAng) * R);
-        ctx.stroke();
       }
 
       let anyMajorLit = false;
-      blipsRef.current = blipsRef.current.filter((b) => t - b.born < b.life);
       for (const b of blipsRef.current) {
         const age = (t - b.born) / b.life;
-        const d = Math.abs((((sweepAng - b.ang) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2));
-        const lit = Math.max(0, 1 - d / 1.1);
-        const alpha = Math.max(0, 1 - age) * (0.25 + 0.75 * lit);
+        const alpha = Math.max(0, 1 - age);
         const x = Math.cos(b.ang) * b.dist * R;
         const y = Math.sin(b.ang) * b.dist * R;
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = b.major ? SALMON : ac;
-        ctx.beginPath();
-        ctx.arc(x, y, (b.major ? 5 : 3) * (1 + lit * 0.6), 0, Math.PI * 2);
-        ctx.fill();
-        if (b.major) {
-          if (lit > 0.4) anyMajorLit = true;
-          ctx.strokeStyle = SALMON;
-          ctx.lineWidth = 1;
-          ctx.globalAlpha = alpha * 0.7;
+        const cellR = b.major ? 16 : 9;
+        const stops: [number, string][] = b.major
+          ? [
+              [0, SALMON],
+              [0.55, '#e0a33f'],
+              [1, 'rgba(0,0,0,0)'],
+            ]
+          : [
+              [0, ac],
+              [0.6, ac + '66'],
+              [1, 'rgba(0,0,0,0)'],
+            ];
+        for (let k = 0; k < 3; k++) {
+          const jx = Math.sin(t * 1.3 + k * 2 + b.born) * cellR * 0.25;
+          const jy = Math.cos(t * 1.1 + k * 3 + b.born) * cellR * 0.25;
+          const grad2 = ctx.createRadialGradient(x + jx, y + jy, 0, x + jx, y + jy, cellR);
+          stops.forEach(([off, c]) => grad2.addColorStop(off, c));
+          ctx.globalAlpha = alpha * 0.5;
+          ctx.fillStyle = grad2;
           ctx.beginPath();
-          ctx.arc(x, y, 9 + Math.sin(t * 6) * 2, 0, Math.PI * 2);
-          ctx.stroke();
+          ctx.arc(x + jx, y + jy, cellR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        if (b.major) {
+          const d = Math.abs((((sweepAng - b.ang) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2));
+          if (d < 0.5 && age < 0.8) anyMajorLit = true;
         }
       }
-      if (lockElRef.current) lockElRef.current.style.visibility = anyMajorLit ? 'visible' : 'hidden';
 
       ctx.globalAlpha = 1;
       ctx.fillStyle = ac;
@@ -427,6 +687,36 @@ export default function SensorsPage() {
       ctx.arc(0, 0, 3, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
+      return anyMajorLit;
+    }
+
+    const LOCK_LABEL: Record<ModeKey, string> = {
+      bio: 'CONTACT ISOLATED',
+      geo: 'ANOMALY LOCKED',
+      em: 'SOURCE LOCKED',
+      met: 'CELL TRACKED',
+    };
+
+    function drawPrimary(t: number) {
+      const cv = sweepRef.current;
+      if (!cv) return;
+      const { ctx, w, h } = fitCanvas(cv);
+      ctx.clearRect(0, 0, w, h);
+      const key = modeRef.current.key;
+      const ac = MODES[key].accent;
+      blipsRef.current = blipsRef.current.filter((b) => t - b.born < b.life);
+
+      const anyMajorLit =
+        key === 'bio'
+          ? drawBio(ctx, w, h, t, ac)
+          : key === 'geo'
+          ? drawGeo(ctx, w, h, t, ac)
+          : key === 'em'
+          ? drawEmField(ctx, w, h, t, ac)
+          : drawMet(ctx, w, h, t, ac);
+
+      if (lockElRef.current) lockElRef.current.style.visibility = anyMajorLit ? 'visible' : 'hidden';
+      if (lockTextRef.current) lockTextRef.current.textContent = `▲ ${LOCK_LABEL[key]} ▲`;
     }
 
     function drawWave(t: number) {
@@ -468,14 +758,34 @@ export default function SensorsPage() {
       for (let i = 0; i <= N; i++) {
         const x = (i / N) * w;
         const tt = t * def.waveHz * 2 + (i / N) * 7;
-        let v =
-          Math.sin(tt * 2.1) * 0.45 +
-          Math.sin(tt * 4.7 + 1.3) * 0.2 +
-          noise.wave(tt) * def.waveJag * 1.6;
+        let v: number;
+
         if (m.key === 'bio') {
-          const beat = (t * 1.25 + (i / N) * 2) % 1;
-          if (beat < 0.08) v += Math.sin((beat / 0.08) * Math.PI) * 1.4;
+          // ECG complex: P bump, sharp QRS spike, T bump, otherwise flat
+          const phase = (t * 1.25 + (i / N) * 1) % 1;
+          const gauss = (c: number, wgt: number, amp: number) => Math.exp(-(((phase - c) / wgt) ** 2)) * amp;
+          v =
+            gauss(0.08, 0.03, 0.16) +
+            gauss(0.155, 0.01, -0.22) +
+            gauss(0.18, 0.014, 1.7) +
+            gauss(0.205, 0.012, -0.32) +
+            gauss(0.42, 0.08, 0.26) +
+            noise.wave(tt) * 0.02;
+        } else if (m.key === 'geo') {
+          // seismograph: near-flat trace, punctuated by tremor bursts
+          const burstCyc = (t * 0.1 + i / N / 6) % 1;
+          const burstEnv = burstCyc > 0.55 && burstCyc < 0.8 ? Math.sin(((burstCyc - 0.55) / 0.25) * Math.PI) : 0;
+          v = noise.wave(tt * 1.1) * 0.05 + burstEnv * (Math.sin(tt * 26) * 0.5 + noise.wave(tt * 6) * 0.7);
+        } else if (m.key === 'em') {
+          // impulse/discharge spikes over a quiet noise floor
+          const trigger = Math.sin(tt * 1.8 + Math.sin(tt * 0.6) * 2.2);
+          v = noise.wave(tt * 2.2) * 0.08;
+          if (Math.abs(trigger) > 0.965) v += Math.sign(trigger) * ((Math.abs(trigger) - 0.965) / 0.035) * 1.7;
+        } else {
+          // barometric: smooth, slow, rolling — no spikes at all
+          v = Math.sin(tt * 0.55) * 0.4 + Math.sin(tt * 0.21 + 1) * 0.16 + noise.wave(tt * 0.4) * 0.06;
         }
+
         v *= settle;
         peak = Math.max(peak, Math.abs(v));
         const y = mid - v * h * 0.3;
@@ -502,8 +812,25 @@ export default function SensorsPage() {
       const pad = h * 0.08;
 
       for (let i = 0; i < n; i++) {
-        const base = 0.25 + 0.5 * Math.exp(-Math.pow((i - n * 0.4) / (n * 0.3), 2));
-        let v = base + noise.spec[i](t * (key === 'em' ? 2.2 : 1)) * 0.35;
+        let v: number;
+
+        if (key === 'geo') {
+          // layered strata terraces: stable, blocky, barely animated
+          const terrace = 0.32 + 0.42 * ((Math.floor(i / 3) % 3) / 2);
+          v = terrace + noise.spec[i](t * 0.4) * 0.06;
+        } else if (key === 'em') {
+          // erratic energy bands: noisy, high-contrast, occasional forced spike
+          v = 0.5 + noise.spec[i](t * 2.6) * 0.55 + noise.spec[(i + 7) % n](t * 4.3) * 0.3;
+          if ((Math.floor(t * 4) + i) % 7 === 0) v = Math.max(v, 0.92);
+        } else if (key === 'met') {
+          // soft atmospheric bands: smooth, low-contrast, slow-moving
+          const dome = 0.3 + 0.4 * Math.exp(-Math.pow((i - n * 0.5) / (n * 0.4), 2));
+          v = dome + noise.spec[i](t * 0.35) * 0.14;
+        } else {
+          // bio: biometric band envelope
+          const dome = 0.25 + 0.5 * Math.exp(-Math.pow((i - n * 0.4) / (n * 0.3), 2));
+          v = dome + noise.spec[i](t) * 0.3;
+        }
         v = Math.max(0.04, Math.min(1, v));
         const bh = v * (h - pad * 2);
         const x = gap + i * (bw + gap);
@@ -541,7 +868,7 @@ export default function SensorsPage() {
         });
         lastBlip = t;
       }
-      drawSweep(t);
+      drawPrimary(t);
       drawWave(t);
       drawSpec(t);
       raf = requestAnimationFrame(frame);
@@ -584,7 +911,7 @@ export default function SensorsPage() {
   const bracketLabel = (label: string) => (
     <div className="flex items-center gap-2 mb-1.5">
       <div className="flex-1 h-[2px] rounded" style={{ background: '#3a3e48' }} />
-      <span className="text-[9px] font-bold tracking-[0.25em]" style={{ color: chassisText }}>{label}</span>
+      <span className="text-[9px] font-bold tracking-[0.2em]" style={{ color: chassisText }}>{label}</span>
       <div className="flex-1 h-[2px] rounded" style={{ background: '#3a3e48' }} />
     </div>
   );
@@ -609,7 +936,7 @@ export default function SensorsPage() {
       `}</style>
 
       <div
-        className="w-full max-w-[420px] select-none"
+        className="w-full max-w-[460px] select-none"
         style={{
           background: 'linear-gradient(160deg, #b6bbc6 0%, #a3a8b4 55%, #8f94a1 100%)',
           borderRadius: 26,
@@ -684,9 +1011,9 @@ export default function SensorsPage() {
 
         {/* library column + display */}
         <div className="px-4 pb-3 flex gap-3">
-          <div className="flex-none w-[72px] flex flex-col py-1">
+          <div className="flex-none w-12 flex flex-col py-1">
             {(['bio', 'geo', 'em', 'met'] as ModeKey[]).map((mode, i) => (
-              <button key={mode} onClick={() => selectMode(mode)} className="flex items-center gap-1.5 py-1.5 text-left">
+              <button key={mode} onClick={() => selectMode(mode)} className="flex items-center gap-1 py-1 text-left">
                 <span
                   className="h-2 w-2 rounded-full flex-none"
                   style={
@@ -695,65 +1022,68 @@ export default function SensorsPage() {
                       : { background: '#565b52', boxShadow: 'inset 0 1px 1px rgba(0,0,0,.5)' }
                   }
                 />
-                <span className="text-[10px] font-bold tracking-[0.12em]" style={{ color: chassisText }}>
-                  {['ALPHA', 'BETA', 'GAMMA', 'DELTA'][i]}
+                <span className="text-[8px] font-bold tracking-[0.08em]" style={{ color: chassisText }}>
+                  {['ALPHA', 'BETA', 'GAMMA', 'DELTA'][i][0]}
                 </span>
               </button>
             ))}
-            <span className="text-[10px] font-bold tracking-[0.12em] mt-1" style={{ color: chassisText }}>
-              LIBRARY
+            <span className="text-[7px] font-bold tracking-[0.08em] mt-1" style={{ color: chassisText }}>
+              LIB
             </span>
             <div
-              className="mt-1.5 h-16 w-8 rounded-sm relative"
+              className="mt-1.5 h-10 w-7 rounded-sm relative"
               style={{ background: '#15161a', boxShadow: 'inset 0 2px 5px rgba(0,0,0,.8)' }}
             >
-              <span className="absolute left-1 bottom-0.5 text-[8px] font-bold" style={{ color: '#cfd3da' }}>A</span>
-              <span className="absolute right-1 top-0.5 text-[8px] font-bold" style={{ color: '#cfd3da' }}>B</span>
-              <div className="absolute left-1/2 -translate-x-1/2 top-1.5 bottom-1.5 w-[3px] rounded" style={{ background: '#cfd3da' }} />
+              <span className="absolute left-0.5 bottom-0.5 text-[6px] font-bold" style={{ color: '#cfd3da' }}>A</span>
+              <span className="absolute right-0.5 top-0.5 text-[6px] font-bold" style={{ color: '#cfd3da' }}>B</span>
+              <div className="absolute left-1/2 -translate-x-1/2 top-1.5 bottom-1.5 w-[2px] rounded" style={{ background: '#cfd3da' }} />
             </div>
           </div>
 
-          {/* screen bezel */}
+          {/* screen bezel — kept roughly square, like the physical prop's single combined readout */}
           <div className="flex-1 rounded-lg p-1.5 min-w-0" style={{ background: '#40444e', boxShadow: 'inset 0 2px 6px rgba(0,0,0,.7)' }}>
             <div
-              className="rounded-md overflow-hidden"
+              className="rounded-md overflow-hidden flex flex-col"
               style={{
                 background: '#000',
                 border: emrg ? `2px solid ${SALMON}` : '2px solid #1b1d24',
               }}
             >
               <div
-                className="flex items-center justify-between px-2 py-1 text-[9px] font-bold tracking-[0.2em]"
+                className="flex items-center justify-between px-2 py-1 text-[8px] font-bold tracking-[0.15em]"
                 style={{ color: accent, borderBottom: '1px solid #1c1c26' }}
               >
-                <span>{def.sweepTitle}</span>
-                <span>{String(scan).padStart(4, '0')}</span>
+                <span className="truncate">{def.sweepTitle}</span>
+                <span className="flex-none">{String(scan).padStart(4, '0')}</span>
               </div>
 
-              <div className="relative">
-                <canvas ref={sweepRef} className="w-full aspect-square block" />
-                <div
-                  ref={lockElRef}
-                  className="absolute left-0 right-0 bottom-1 text-center text-[9px] tracking-[0.3em] pointer-events-none"
-                  style={{ color: SALMON, visibility: 'hidden', animation: 'sensor-blink .5s infinite' }}
-                >
-                  ▲ CONTACT ISOLATED ▲
+              <div className="flex gap-1.5 p-1.5">
+                <div className="relative flex-none w-[44%]">
+                  <canvas ref={sweepRef} className="w-full aspect-square block" />
+                  <div
+                    ref={lockElRef}
+                    className="absolute left-0 right-0 bottom-0.5 text-center text-[7px] tracking-[0.15em] pointer-events-none"
+                    style={{ color: SALMON, visibility: 'hidden', animation: 'sensor-blink .5s infinite' }}
+                  >
+                    <span ref={lockTextRef}>▲ LOCK ▲</span>
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                  <div>
+                    <div className="flex items-center justify-between text-[7px] font-bold tracking-[0.1em]" style={{ color: accent }}>
+                      <span className="truncate">{def.waveTitle}</span>
+                      <span ref={waveValRef} className="flex-none" />
+                    </div>
+                    <canvas ref={waveRef} className="w-full h-11 block" />
+                  </div>
+                  <canvas ref={specRef} className="w-full flex-1 block" />
                 </div>
               </div>
 
-              <div style={{ borderTop: '1px solid #1c1c26' }}>
-                <div className="flex items-center justify-between px-2 pt-1 text-[8px] font-bold tracking-[0.18em]" style={{ color: accent }}>
-                  <span>{def.waveTitle}</span>
-                  <span ref={waveValRef} />
-                </div>
-                <canvas ref={waveRef} className="w-full h-16 block" />
-              </div>
-
-              <canvas ref={specRef} className="w-full h-12 block" style={{ borderTop: '1px solid #1c1c26' }} />
-
-              <div className="px-2 py-1 text-[10px] leading-[1.5] tracking-[0.04em]" style={{ borderTop: '1px solid #1c1c26' }}>
+              <div className="grid grid-cols-2 gap-x-2 px-2 pb-1.5 text-[8px] leading-[1.45] tracking-[0.02em]" style={{ borderTop: '1px solid #1c1c26' }}>
                 {rows.map((r) => (
-                  <div key={r.k} className="flex justify-between gap-2 whitespace-nowrap overflow-hidden">
+                  <div key={r.k} className="flex justify-between gap-1 whitespace-nowrap overflow-hidden">
                     <span className="truncate" style={{ color: '#9999CC' }}>{r.k}</span>
                     <span
                       className="tabular-nums flex-none"
@@ -770,14 +1100,14 @@ export default function SensorsPage() {
               </div>
 
               <div
-                className="px-2 h-4 flex items-center overflow-hidden whitespace-nowrap text-[8px] tracking-[0.1em]"
+                className="px-2 h-3.5 flex items-center overflow-hidden whitespace-nowrap text-[7px] tracking-[0.08em]"
                 style={{ borderTop: '1px solid #1c1c26', color: '#494960' }}
               >
                 <span>{ticker}</span>
               </div>
 
               <div
-                className="px-2 py-0.5 flex justify-between gap-2 text-[8px] tracking-[0.08em] overflow-hidden whitespace-nowrap"
+                className="px-2 py-1 flex justify-between gap-2 text-[7px] tracking-[0.06em] overflow-hidden whitespace-nowrap"
                 style={{ borderTop: '1px solid #1c1c26', color: emrg ? SALMON : '#6a6a8a' }}
               >
                 <span className="flex-none">SD {stardate}</span>
@@ -805,11 +1135,11 @@ export default function SensorsPage() {
                       : undefined,
                   }}
                 >
-                  <span className="block pt-1.5">{{ geo: 'GEO', met: 'MET', bio: 'BIO', em: 'EM' }[key]}</span>
+                  <span className="block pt-1">{{ geo: 'GEO', met: 'MET', bio: 'BIO', em: 'EM' }[key]}</span>
                 </button>
               );
             })}
-            <div className="flex flex-col gap-[3px] p-[3px] rounded-sm" style={{ background: '#20241e' }}>
+            <div className="flex flex-col gap-[2px] p-[2px] rounded-sm" style={{ background: '#20241e' }}>
               <div className="h-2.5 w-2.5" style={{ background: '#9fd65c', boxShadow: '0 0 5px #9fd65c66' }} />
               <div className="h-2.5 w-2.5" style={{ background: '#3d4438' }} />
             </div>
@@ -818,7 +1148,7 @@ export default function SensorsPage() {
 
         {/* ===== hinge ===== */}
         <div
-          className="h-8 flex justify-around items-center"
+          className="h-7 flex justify-around items-center"
           style={{
             background: 'linear-gradient(#7c8090, #6a6e7c)',
             borderTop: '2px solid #565a66',
@@ -828,7 +1158,7 @@ export default function SensorsPage() {
           {[0, 1].map((i) => (
             <div
               key={i}
-              className="h-6 w-20 rounded-sm"
+              className="h-5 w-20 rounded-sm"
               style={{
                 background: 'linear-gradient(#9da2ae, #7c8090 45%, #565a66)',
                 border: '1px solid #4a4e5a',
@@ -839,26 +1169,26 @@ export default function SensorsPage() {
         </div>
 
         {/* ===== bottom shell ===== */}
-        <div className="px-4 pt-4 pb-4">
+        <div className="px-4 pt-3 pb-4">
           {bracketLabel('COM TRANSMISSION')}
-          <div className="flex gap-3 items-stretch">
+          <div className="flex gap-2.5 items-stretch">
             <div className="flex-1 flex flex-col gap-2">
-              <button className="tr-key py-2 text-[10px] leading-[1.35] tracking-wider" onClick={keyBeep}>
+              <button className="tr-key py-1.5 text-[10px] leading-[1.3] tracking-wider" onClick={keyBeep}>
                 ACPT<br />POOL
               </button>
-              <button className="tr-key py-2 text-[10px] leading-[1.35] tracking-wider" onClick={keyBeep}>
+              <button className="tr-key py-1.5 text-[10px] leading-[1.3] tracking-wider" onClick={keyBeep}>
                 INTRSHP<br />TRICRDR
               </button>
             </div>
             <div
-              className="flex flex-col justify-center text-[11px] font-black leading-[1.15] text-center"
+              className="flex flex-col justify-center text-[11px] font-black leading-[1.1] text-center"
               style={{ color: chassisText }}
             >
               E<br />M<br />R<br />G
             </div>
             <button
               onClick={fireEmrg}
-              className="w-28 rounded-md p-2"
+              className="w-24 rounded-md p-2"
               style={{
                 background: 'linear-gradient(145deg, #2b2d33, #17181c)',
                 border: '1px solid #0d0e11',
@@ -866,7 +1196,7 @@ export default function SensorsPage() {
               }}
             >
               <div
-                className="h-full min-h-16 rounded"
+                className="h-full min-h-14 rounded"
                 style={{
                   background: 'radial-gradient(circle at 42% 35%, #a33a4a, #5e1620 75%)',
                   boxShadow: 'inset 0 -3px 6px rgba(0,0,0,.6), inset 0 2px 3px rgba(255,255,255,.2)',
@@ -876,19 +1206,19 @@ export default function SensorsPage() {
             </button>
           </div>
 
-          <div className="flex gap-4 mt-4">
+          <div className="flex gap-3 mt-3">
             <div className="flex-1">
               {bracketLabel('IMAGE RECORD')}
               <div className="flex gap-2">
-                <button className="tr-key flex-1 py-1.5 text-[9px] leading-[1.35] tracking-wider" onClick={keyBeep}>
+                <button className="tr-key flex-1 py-1.5 text-[9px] leading-[1.3] tracking-wider" onClick={keyBeep}>
                   FWD<br />INPUT
                 </button>
-                <button className="tr-key flex-1 py-1.5 text-[9px] leading-[1.35] tracking-wider" onClick={keyBeep}>
+                <button className="tr-key flex-1 py-1.5 text-[9px] leading-[1.3] tracking-wider" onClick={keyBeep}>
                   RVS<br />ERASE
                 </button>
               </div>
             </div>
-            <div className="w-28">
+            <div className="w-24">
               {bracketLabel('LIBRARY B')}
               <div className="flex gap-2">
                 <button className="tr-key flex-1 py-1.5 text-[11px]" onClick={keyBeep}>I</button>
@@ -898,7 +1228,7 @@ export default function SensorsPage() {
           </div>
 
           {/* ID plate */}
-          <div className="mt-5 flex items-center gap-2.5">
+          <div className="mt-4 flex items-center gap-2.5">
             <button className="rounded-sm p-1.5 flex-none" style={{ background: '#17181c' }} onClick={keyBeep}>
               <span className="block h-3 w-3" style={{ background: '#d9569b', boxShadow: '0 0 6px #d9569b99' }} />
             </button>
@@ -907,10 +1237,10 @@ export default function SensorsPage() {
               className="flex-1 rounded-sm px-2 py-1 text-center"
               style={{ ...cream, border: '1px solid #5c5648' }}
             >
-              <p className="text-[10px] font-black tracking-[0.12em]" style={{ color: '#17150f' }}>
+              <p className="text-[10px] font-black tracking-[0.1em]" style={{ color: '#17150f' }}>
                 TR-580 TRICORDER VII
               </p>
-              <p className="text-[8px] font-bold tracking-[0.16em]" style={{ color: '#17150f' }}>
+              <p className="text-[8px] font-bold tracking-[0.14em]" style={{ color: '#17150f' }}>
                 STARFLEET R&D — SAN FRANCISCO
               </p>
             </div>
