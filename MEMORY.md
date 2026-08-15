@@ -112,7 +112,13 @@ User's preferred text size is saved to `localStorage` key `textSize` (0–4 inde
 railway up --detach
 ```
 
-GitHub remote is `https://github.com/iBradPro/sojourner-app` (private). Railway does NOT auto-deploy from GitHub — always run `railway up --detach` manually after committing.
+GitHub remote is `https://github.com/iBradPro/sojourner-app`. **This repo is PUBLIC on purpose** (verified 2026-08-14) — Brad wants other people to be able to get at it. It is the only one of his repos that is public; do NOT "fix" it to private. Because it's public, never commit secrets: `.env*` is gitignored and must stay that way, and real keys live in Railway's variables, not the repo.
+
+**FIXED 2026-08-15: GitHub auto-deploy now works.** Railway's Source is connected to `iBradPro/sojourner-app`, branch `main`. Pushing to main deploys automatically. `railway up --detach` still works and still deploys the local working directory (committed or not) if you want to bypass git.
+
+History of the bug, so it isn't re-diagnosed wrong: the old note said "the GitHub webhook is broken." It wasn't — **no repo had ever been connected to the service at all.** The service was created by `railway up`, which uploads straight from the PC, so there was never a webhook. The Railway GitHub App already had "All repositories" access, so permissions were never the problem either.
+
+**The actual gotcha:** in Railway's repo picker, *clicking* the repo row silently does nothing (tried 3×, both by coordinate and by element ref). What works is typing to filter the list and pressing **Enter** to select. Then apply the staged changes via "Deploy Changes". If you ever need to reconnect a Railway source, use the keyboard.
 
 ## People
 
