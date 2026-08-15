@@ -274,6 +274,46 @@ function startAudio(): AudioRig {
   };
 }
 
+/* Randomized short computer-chirp phrases — multi-tone blips with varying
+   rhythm (like the LCARS/TNG console beeps) rather than one fixed tone. */
+const BLIP_PATTERNS: { freq: number; dur: number; delay: number }[][] = [
+  [{ freq: 1200, dur: 0.05, delay: 0 }],
+  [
+    { freq: 900, dur: 0.045, delay: 0 },
+    { freq: 1400, dur: 0.05, delay: 70 },
+  ],
+  [
+    { freq: 1500, dur: 0.04, delay: 0 },
+    { freq: 950, dur: 0.05, delay: 60 },
+  ],
+  [
+    { freq: 700, dur: 0.035, delay: 0 },
+    { freq: 1000, dur: 0.035, delay: 55 },
+    { freq: 1450, dur: 0.05, delay: 110 },
+  ],
+  [
+    { freq: 1600, dur: 0.03, delay: 0 },
+    { freq: 1150, dur: 0.03, delay: 50 },
+    { freq: 800, dur: 0.05, delay: 100 },
+  ],
+  [
+    { freq: 1100, dur: 0.03, delay: 0 },
+    { freq: 1100, dur: 0.03, delay: 65 },
+  ],
+  [
+    { freq: 620, dur: 0.05, delay: 0 },
+    { freq: 1650, dur: 0.035, delay: 80 },
+  ],
+];
+
+function playBlip(rig: AudioRig) {
+  const pattern = BLIP_PATTERNS[Math.floor(Math.random() * BLIP_PATTERNS.length)];
+  const shift = rand(0.88, 1.15);
+  for (const note of pattern) {
+    setTimeout(() => rig.beep(note.freq * shift, note.dur, 0.3), note.delay);
+  }
+}
+
 /* ============================================================
    Component
    ============================================================ */
@@ -315,8 +355,8 @@ export default function SensorsPage() {
   const [stardate, setStardate] = useState('77812.4');
   const [status, setStatus] = useState(STATUS_LINES[0]);
   const [ticker, setTicker] = useState('');
-  const [audioOn, setAudioOn] = useState(false);
   const [emrg, setEmrg] = useState(false);
+  const [audioLive, setAudioLive] = useState(false);
 
   const sweepRef = useRef<HTMLCanvasElement>(null);
   const waveRef = useRef<HTMLCanvasElement>(null);
@@ -349,23 +389,19 @@ export default function SensorsPage() {
     blipsRef.current = [];
     setModeKey(key);
     refreshReadout(true);
-    const au = audioRef.current;
-    if (au) {
-      au.beep(740, 0.06);
-      setTimeout(() => audioRef.current?.beep(1180, 0.08), 90);
-    }
+    const au = ensureAudio();
+    au.beep(740, 0.06);
+    setTimeout(() => audioRef.current?.beep(1180, 0.08), 90);
   }
 
-  function toggleAudio() {
-    if (audioRef.current) {
-      audioRef.current.close();
-      audioRef.current = null;
-      setAudioOn(false);
-    } else {
+  /* Web Audio needs a user gesture to start — lazily spin it up on first
+     button press instead of requiring a dedicated on/off toggle. */
+  function ensureAudio(): AudioRig {
+    if (!audioRef.current) {
       audioRef.current = startAudio();
-      audioRef.current.beep(988, 0.09);
-      setAudioOn(true);
+      setAudioLive(true);
     }
+    return audioRef.current;
   }
 
   useEffect(() => {
@@ -891,17 +927,15 @@ export default function SensorsPage() {
   const accent = def.accent;
 
   function keyBeep() {
-    audioRef.current?.beep(rand(750, 1250), 0.05, 0.3);
+    playBlip(ensureAudio());
   }
 
   function fireEmrg() {
     setEmrg(true);
-    const au = audioRef.current;
-    if (au) {
-      au.beep(520, 0.18, 0.6);
-      setTimeout(() => audioRef.current?.beep(520, 0.18, 0.6), 260);
-      setTimeout(() => audioRef.current?.beep(680, 0.3, 0.6), 540);
-    }
+    const au = ensureAudio();
+    au.beep(520, 0.18, 0.6);
+    setTimeout(() => audioRef.current?.beep(520, 0.18, 0.6), 260);
+    setTimeout(() => audioRef.current?.beep(680, 0.3, 0.6), 540);
     setTimeout(() => setEmrg(false), 2800);
   }
 
@@ -986,12 +1020,12 @@ export default function SensorsPage() {
         {/* control key row */}
         <div className="px-4 pb-3 flex items-center gap-2">
           <div className="flex flex-col items-center gap-1">
-            <button className="tr-key px-2 py-1 text-[10px] tracking-wider" onClick={toggleAudio}>PWR</button>
+            <button className="tr-key px-2 py-1 text-[10px] tracking-wider" onClick={keyBeep}>PWR</button>
             <div
               className="h-2 w-7 rounded-sm"
               style={{
-                background: audioOn ? '#d9569b' : '#463844',
-                boxShadow: audioOn ? '0 0 8px #d9569baa' : 'inset 0 1px 2px rgba(0,0,0,.6)',
+                background: audioLive ? '#d9569b' : '#463844',
+                boxShadow: audioLive ? '0 0 8px #d9569baa' : 'inset 0 1px 2px rgba(0,0,0,.6)',
               }}
             />
           </div>
