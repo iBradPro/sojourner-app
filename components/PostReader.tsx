@@ -1,21 +1,19 @@
 'use client';
 import { useState } from 'react';
+import { splitParagraphs } from '@/lib/utils';
 
 const SIZES = ['text-sm', 'text-[15px]', 'text-base', 'text-lg', 'text-xl'] as const;
 
 function renderContent(content: string) {
-  // Split on any run of newlines — each chunk is a paragraph
-  return content.split(/\n+/).map((chunk, i) => {
-    const trimmed = chunk.trim();
-    if (!trimmed) return null;
-    return (
-      <p
-        key={i}
-        style={{ marginBottom: '1em', color: '#e8e0d0' }}
-        dangerouslySetInnerHTML={{ __html: trimmed }}
-      />
-    );
-  });
+  // Paragraph rules live in splitParagraphs so the reader and anything else
+  // that renders a post body cannot drift apart again.
+  return splitParagraphs(content).map((para, i) => (
+    <p
+      key={i}
+      style={{ marginBottom: '1em', color: '#e8e0d0' }}
+      dangerouslySetInnerHTML={{ __html: para }}
+    />
+  ));
 }
 
 export default function PostReader({ content }: { content: string }) {

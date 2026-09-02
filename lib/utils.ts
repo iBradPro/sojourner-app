@@ -97,19 +97,24 @@ export function stripHtml(html: string | null | undefined): string {
   return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
 }
 
-// Nova renders one stored newline as a visible paragraph break (no <p> tags
-// stored). Match that: any run of newlines is a single paragraph boundary, so
-// posts look identical in-app and on Nova.
-export function formatPostContent(content: string): string {
+// How Nova actually stores and renders a post body, verified 2026-09-02 against
+// the notification email Nova sends out (it runs the stored text through nl2br
+// and nothing more):
+//
+//   one newline  ->  a line break, lines sit tight together
+//   a blank line ->  a paragraph break, with visible space
+//
+// The old code split on /\n+/, which collapsed both cases into "paragraph", so
+// every soft line break opened a gap the email did not have. That is the bug
+// that kept coming back. Do not reintroduce it.
+//
+// Returns paragraphs ready for dangerouslySetInnerHTML: inline markup
+// (<i>/<b>/<u>) is preserved, and soft breaks become <br />.
+export function splitParagraphs(content: string | null | undefined): string[] {
+  if (!content) return [];
   return content
-    .split(/\n+/)
-    .map((chunk) => {
-      const trimmed = chunk.trim();
-      if (!trimmed) return '';
-      // Already an HTML block element — leave it as-is
-      if (/^<(p|h[1-6]|ul|ol|li|div|blockquote|hr|table|pre|br)/i.test(trimmed)) return trimmed;
-      // Inline HTML or mixed — wrap in <p>
-      return `<p>${trimmed}</p>`;
-    })
-    .join('\n');
+    .replace(/\r\n?/g, '\n')             // CRLF and lone CR -> LF
+    .split(/\n[ \t]*(?:\n[ \t]*)+/)      // one or more blank lines
+    .map((para) => para.trim().replace(/\n/g, '<br />'))
+    .filter(Boolean);
 }
