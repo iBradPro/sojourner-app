@@ -7,9 +7,14 @@ interface Props {
   placeholder?: string;
 }
 
-// --- Serialization: editor DOM -> "plain text + inline tags, single \n per line" ---
-// Nova stores one newline per paragraph break and renders it as visible spacing.
-// We must emit ONLY <i>/<b>/<u>, never <p>/<br>, and never doubled newlines.
+// --- Serialization: editor DOM -> plain text + inline tags ---
+// Nova stores plain text and renders it with nl2br: one newline is a tight line
+// break, a blank line is a paragraph gap. splitParagraphs() in lib/utils.ts is
+// the reader side of that same rule, verified against Nova's own emails.
+// An earlier version of this comment claimed one newline WAS a paragraph break.
+// That was wrong, and it is why post spacing was broken three times running.
+// Emit ONLY <i>/<b>/<u>, never <p>/<br>. Blank lines must survive: they are how
+// the writer makes a paragraph.
 
 function serializeNode(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? '';
