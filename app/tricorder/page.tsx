@@ -349,6 +349,44 @@ export default function SensorsPage() {
     }
   }
 
+  /* PWR doubles as the way out: a tap chirps, a press-and-hold powers the
+     tricorder down and returns to the site. Same 650ms hold as the header cap. */
+  const pwrTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pwrStart = useRef<{ x: number; y: number } | null>(null);
+  const pwrHeld = useRef(false);
+
+  function pwrDown(e: React.PointerEvent) {
+    pwrHeld.current = false;
+    pwrStart.current = { x: e.clientX, y: e.clientY };
+    pwrTimer.current = setTimeout(() => {
+      pwrTimer.current = null;
+      pwrHeld.current = true;
+      powerDown();
+    }, EXIT_HOLD_MS);
+  }
+
+  function pwrUp() {
+    if (pwrTimer.current) {
+      clearTimeout(pwrTimer.current);
+      pwrTimer.current = null;
+      if (!pwrHeld.current) keyBeep();   // a short press keeps its chirp
+    }
+    pwrStart.current = null;
+  }
+
+  function pwrAbort() {
+    if (pwrTimer.current) clearTimeout(pwrTimer.current);
+    pwrTimer.current = null;
+    pwrStart.current = null;
+  }
+
+  function pwrMove(e: React.PointerEvent) {
+    if (!pwrStart.current) return;
+    if (Math.hypot(e.clientX - pwrStart.current.x, e.clientY - pwrStart.current.y) > EXIT_MOVE_TOLERANCE) {
+      pwrAbort();
+    }
+  }
+
   const [modeKey, setModeKey] = useState<ModeKey>('bio');
   const [rows, setRows] = useState<Row[]>([]);
   const [scan, setScan] = useState(1);
@@ -939,6 +977,15 @@ export default function SensorsPage() {
     setTimeout(() => setEmrg(false), 2800);
   }
 
+  /* Powering down: descending two-tone, then leave. The short delay lets the
+     sound finish, since unmounting closes the audio rig. */
+  function powerDown() {
+    const au = ensureAudio();
+    au.beep(880, 0.09, 0.5);
+    setTimeout(() => audioRef.current?.beep(560, 0.14, 0.5), 110);
+    setTimeout(() => router.push('/'), 340);
+  }
+
   const chassisText = '#23262e';
   const cream = { background: 'linear-gradient(#f6efdb, #e2d9bf)' };
 
@@ -1020,7 +1067,17 @@ export default function SensorsPage() {
         {/* control key row */}
         <div className="px-4 pb-3 flex items-center gap-2">
           <div className="flex flex-col items-center gap-1">
-            <button className="tr-key px-2 py-1 text-[10px] tracking-wider" onClick={keyBeep}>PWR</button>
+            <button
+              className="tr-key px-2 py-1 text-[10px] tracking-wider"
+              style={{ WebkitTouchCallout: 'none', touchAction: 'none' }}
+              onPointerDown={pwrDown}
+              onPointerUp={pwrUp}
+              onPointerLeave={pwrAbort}
+              onPointerCancel={pwrAbort}
+              onPointerMove={pwrMove}
+              onContextMenu={(e) => e.preventDefault()}
+              title="Hold to power down"
+            >PWR</button>
             <div
               className="h-2 w-7 rounded-sm"
               style={{
