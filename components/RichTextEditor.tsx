@@ -54,12 +54,16 @@ function serialize(root: HTMLElement): string {
   if (hasBare) lines.push(bare);
   // drop trailing empty lines so we never save a dangling \n
   while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
-  return lines.join('\n');
+  return lines.join('\n').replace(/\r/g, '');
 }
 
 function deserialize(content: string): string {
   if (!content) return '';
   return content
+    // Nova writes CRLF. The HTML parser turns a stray CR into LF, so leaving
+    // them in meant one stored paragraph gap came back out of the editor as
+    // three blank lines, and it compounded on every save. Normalize first.
+    .replace(/\r\n?/g, '\n')
     .split('\n')
     .map(line => (line === '' ? '<div><br></div>' : `<div>${line}</div>`))
     .join('');
@@ -123,7 +127,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
 
   return (
     <div>
-      <style>{`.rte:empty:before{content:attr(data-placeholder);color:#4a3a2a;pointer-events:none;}.rte>div{margin-bottom:0.75em;}`}</style>
+      <style>{`.rte:empty:before{content:attr(data-placeholder);color:#4a3a2a;pointer-events:none;}.rte>div{margin:0;}`}</style>
       {/* Toolbar: sticky on scroll. overflow:visible on all ancestors required for sticky to work in Safari. */}
       <div className="sticky top-0 z-20 flex gap-1 mb-2 py-2" style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(4px)' }}>
         <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => format('bold')} style={{ ...btnStyle, fontWeight: 700, minWidth: '2.25rem' }} title="Bold (⌘B)">B</button>
