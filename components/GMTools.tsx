@@ -98,6 +98,8 @@ export default function GMTools() {
   async function handleCreate() {
     const writer = writers.find(w => String(w.id) === selectedUserId);
     if (!writer) return;
+    const token = getWriteToken();
+    if (!token) { setError('No API token on this device. Set up write access first.'); return; }
     setCreating(true);
     setError('');
     setMagicLink('');
@@ -108,6 +110,9 @@ export default function GMTools() {
         body: JSON.stringify({
           path: '/tokens',
           method: 'POST',
+          // The proxy proves GM status from this token before it will reach for
+          // the GM key. Sending it is not optional; without it this is a 401.
+          token,
           useGmKey: true,
           body: {
             label: `Writer access - ${writer.name}`,
