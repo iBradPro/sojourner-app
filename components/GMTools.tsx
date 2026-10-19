@@ -1,29 +1,53 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getWriteToken } from '@/lib/token';
 
-const BASE_URL = 'https://sojourner-app-production.up.railway.app';
 const WRITER_SCOPES = ['posts:read.own', 'posts:write', 'posts:delete', 'characters:read', 'missions:read'];
 
-const WRITERS = [
-  { id: 47, name: 'Andrew (Thomas Mitchell)' },
-  { id: 11, name: 'Brian Whyte' },
-  { id: 7,  name: 'Christopher (Karim)' },
-  { id: 46, name: 'Dan (Theodor Wishmore)' },
-  { id: 44, name: 'Doug (Ezhr Delja)' },
-  { id: 34, name: 'Fox (M\'Razza)' },
-  { id: 31, name: 'Heather (Xex Wang)' },
-  { id: 26, name: 'Kim (Mei Ratthi)' },
-  { id: 2,  name: 'Kyle (Noah Balsam)' },
-  { id: 8,  name: 'Mark' },
-  { id: 45, name: 'Marty (Amarok tr\'Ragnar)' },
-  { id: 37, name: 'Nate (Axod Qo)' },
-  { id: 1,  name: 'Reece' },
-  { id: 41, name: 'Teresa Grace (Kaelira Tamsin)' },
-];
+/*
+ * The writer list used to be hardcoded here. On 2026-10-19 Adam joined and
+ * there was simply no way to make him a token, because his name was not in the
+ * array. So the list now comes from Nova: every user who owns a character is a
+ * candidate, and the next writer to join appears without a deploy.
+ */
+
+type CharacterRow = {
+  first_name?: string | null;
+  last_name?: string | null;
+  status?: string | null;
+  user_id?: number | null;
+  user_name?: string | null;
+};
+
+type Writer = { id: number; name: string; characters: string[] };
+
+function fullName(row: CharacterRow): string {
+  return [row.first_name, row.last_name].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+function buildWriters(rows: CharacterRow[]): Writer[] {
+  const byUser = new Map<number, Writer>();
+  for (const row of rows) {
+    const userId = Number(row.user_id);
+    if (!userId) continue;                       // unowned or NPC-only rows
+    const writer =
+      byUser.get(userId) ?? { id: userId, name: row.user_name || `User ${userId}`, characters: [] };
+    // Only their own crew appear in the label. NPCs they also run would bury it.
+    const name = fullName(row);
+    if (name && (row.status === 'active' || row.status === 'pending')) writer.characters.push(name);
+    byUser.set(userId, writer);
+  }
+  return [...byUser.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function writerLabel(writer: Writer): string {
+  return writer.characters.length ? `${writer.name} (${writer.characters.join(', ')})` : writer.name;
+}
 
 export default function GMTools() {
   const [isGM, setIsGM] = useState<boolean | null>(null);
+  const [writers, setWriters] = useState<Writer[]>([]);
+  const [loadingWriters, setLoadingWriters] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [creating, setCreating] = useState(false);
   const [magicLink, setMagicLink] = useState('');
@@ -43,8 +67,36 @@ export default function GMTools() {
       .catch(() => setIsGM(false));
   }, []);
 
+  const loadWriters = useCallback(async () => {
+    const token = getWriteToken();
+    if (!token) return;
+    setLoadingWriters(true);
+    try {
+      const res = await fetch('/api/proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // status=any so a writer whose character is pending or inactive is
+        // still reachable. per_page is above the whole crew; Nova caps at 500.
+        body: JSON.stringify({ path: '/characters?status=any&per_page=500', method: 'GET', token }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? `Error ${res.status}`);
+      const list = buildWriters(Array.isArray(data?.data) ? data.data : []);
+      if (list.length === 0) throw new Error('Nova returned no characters with an owner.');
+      setWriters(list);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not load the writer list.');
+    } finally {
+      setLoadingWriters(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isGM) loadWriters();
+  }, [isGM, loadWriters]);
+
   async function handleCreate() {
-    const writer = WRITERS.find(w => String(w.id) === selectedUserId);
+    const writer = writers.find(w => String(w.id) === selectedUserId);
     if (!writer) return;
     setCreating(true);
     setError('');
@@ -67,7 +119,7 @@ export default function GMTools() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `Error ${res.status}`);
       if (!data.token) throw new Error('No token returned — check GM API key scopes.');
-      setMagicLink(`${BASE_URL}/compose?token=${data.token}`);
+      setMagicLink(`${window.location.origin}/compose?token=${data.token}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
     } finally {
@@ -103,9 +155,9 @@ export default function GMTools() {
                 className="w-full px-4 py-3 focus:outline-none"
                 style={{ background: '#0d0d0d', border: '1px solid #3a2a0a', color: '#FFCC99', borderRadius: '0 0.75rem 0.75rem 0' }}
               >
-                <option value="">Select a writer…</option>
-                {WRITERS.map(w => (
-                  <option key={w.id} value={w.id}>{w.name}</option>
+                <option value="">{loadingWriters ? 'Loading writers…' : 'Select a writer…'}</option>
+                {writers.map(w => (
+                  <option key={w.id} value={w.id}>{writerLabel(w)}</option>
                 ))}
               </select>
             </div>
@@ -121,7 +173,7 @@ export default function GMTools() {
         ) : (
           <div className="space-y-3">
             <p className="text-sm font-medium" style={{ color: '#FFCC99' }}>
-              Setup link for {WRITERS.find(w => String(w.id) === selectedUserId)?.name}
+              Setup link for {writers.find(w => String(w.id) === selectedUserId)?.name}
             </p>
             <p className="text-xs font-mono break-all" style={{ color: '#9999CC' }}>{magicLink}</p>
             <div className="flex gap-2">
